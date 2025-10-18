@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeteBrana - Book Rental & Reading</title>
+    <!-- PDF.js for PDF rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* General body styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Georgia', serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* Navigation styling */
+        nav {
+            background-color: #8B4513;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links li {
+            margin-left: 20px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #ffd700;
+        }
+
+        /* Mobile menu toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Main content area */
+        .main-content {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        /* Loading spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #8B4513;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Book shelf styling */
+        .section-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #8B4513;
+            padding-bottom: 10px;
+        }
+
+        .book-shelf {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .book-item {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .book-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .book-cover {
+            width: 120px;
+            height: 160px;
+            background-color: #8B4513;
+            margin: 0 auto 10px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .book-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .book-author {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .book-status {
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .available {
+            background-color: #e6f7e6;
+            color: #2e7d32;
+        }
+
+        .unavailable {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        /* Modal styling */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background-color: #8B4513;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: #6b3300;
+        }
+
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background-color: #d0d0d0;
+        }
+
+        /* Document Reader Styles - UPDATED */
+        .document-reader {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: white;
+            z-index: 2000;
+            flex-direction: column;
+        }
+
+        .reader-header {
+            background: #8B4513;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .reader-title {
+            font-size: 18px;
+            margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .reader-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .reader-controls button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .reader-controls button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .reader-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* PDF Viewer - UPDATED */
+        #pdf-viewer {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .pdf-page-container {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .pdf-page {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .pdf-page-number {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* Enhanced PDF Controls */
+        .pdf-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            border-radius: 30px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .pdf-controls button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .pdf-controls button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .pdf-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            color: white;
+            font-size: 14px;
+            margin: 0 10px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-left: 10px;
+        }
+
+        .zoom-controls button {
+            font-size: 16px;
+            width: 36px;
+            height: 36px;
+        }
+
+        .zoom-level {
+            color: white;
+            font-size: 14px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        /* Thumbnail sidebar */
+        .pdf-sidebar {
+            width: 200px;
+            background: #f0f0f0;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            padding: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .pdf-sidebar.hidden {
+            transform: translateX(-100%);
+            width: 0;
+            padding: 0;
+            border: none;
+        }
+
+        .pdf-thumbnails {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pdf-thumbnail {
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+
+        .pdf-thumbnail:hover {
+            border-color: #8B4513;
+        }
+
+        .pdf-thumbnail.active {
+            border-color: #8B4513;
+        }
+
+        .pdf-thumbnail canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .thumbnail-page-number {
+            text-align: center;
+            font-size: 12px;
+            padding: 4px;
+            background: rgba(0,0,0,0.05);
+        }
+
+        .toggle-sidebar {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        /* Word content */
+        .word-content {
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            line-height: 1.6;
+            font-size: 16px;
+            overflow-y: auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .loading-reader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 18px;
+            color: #666;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Security overlay to prevent right-click and selection */
+        .security-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3000;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        /* File type indicators */
+        .file-type {
+            font-size: 10px;
+            background: #8B4513;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+
+        /* User dashboard */
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard-section {
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .rented-books, .queue-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        /* Authentication forms */
+        .auth-form {
+            background-color: white;
+            border-radius: 5px;
+            padding: 30px;
+            max-width: 400px;
+            margin: 50px auto;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .error-message {
+            color: #c62828;
+            background-color: #ffebee;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        /* Book styling from original design */
+        .book {
+            width: 100%;
+            max-width: 800px;
+            height: 500px;
+            display: flex;
+            background-color: #8B4513;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: perspective(2000px);
+            padding: 5px;
+            margin: 0 auto;
+        }
+
+        .pages-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            background-color: #fff;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .page {
+            width: 50%;
+            padding: 40px;
+            box-sizing: border-box;
+            background-color: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+        
+        .left-page {
+            border-right: 2px solid #ddd;
+            box-shadow: inset 5px 0 10px rgba(0, 0, 0, 0.1);
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+            transform-origin: right;
+            transform: rotateY(15deg);
+            z-index: 2;
+        }
+
+        .right-page {
+            border-left: 2px solid #ddd;
+            box-shadow: inset -5px 0 10px rgba(0, 0, 0, 0.1);
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+            transform-origin: left;
+            transform: rotateY(-15deg);
+            z-index: 1;
+        }
+
+        .table-of-contents h2 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .table-of-contents ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .table-of-contents li {
+            margin: 15px 0;
+        }
+
+        .table-of-contents a {
+            text-decoration: none;
+            color: #333;
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+
+        .table-of-contents a:hover {
+            color: #007bff;
+        }
+
+        .about-us {
+            max-height: 100%;
+            overflow-y: auto;
+        }
+
+        .about-us h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .about-us p {
+            line-height: 1.6;
+            font-size: 16px;
+            text-align: justify;
+            margin-bottom: 15px;
+        }
+        
+        .bookmark {
+            position: absolute;
+            top: 0;
+            right: 20px;
+            width: 20px;
+            height: 60px;
+            background-color: #8B4513;
+            z-index: 10;
+            clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%);
+        }
+        
+        .page-curl {
+            position: absolute;
+            top: 0;
+            right: -10px;
+            width: 10px;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent);
+            z-index: 1;
+        }
+
+        .right-page .page-curl {
+            left: -10px;
+            right: auto;
+            background: linear-gradient(to left, rgba(0, 0, 0, 0.1), transparent);
+        }
+
+        /* Responsive design - UPDATED */
+        @media (max-width: 1024px) {
+            .book {
+                height: 400px;
+            }
+            
+            .page {
+                padding: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                position: relative;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+                position: absolute;
+                right: 20px;
+                top: 15px;
+            }
+            
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                margin-top: 15px;
+            }
+            
+            .nav-links.show {
+                display: flex;
+            }
+            
+            .nav-links li {
+                margin: 10px 0;
+                text-align: center;
+            }
+            
+            .book-shelf {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .book {
+                height: 300px;
+                flex-direction: column;
+            }
+            
+            .pages-container {
+                flex-direction: column;
+            }
+            
+            .page {
+                width: 100%;
+                height: 50%;
+                padding: 20px;
+            }
+            
+            .left-page, .right-page {
+                transform: none;
+                border-radius: 0;
+            }
+            
+            .left-page {
+                border-right: none;
+                border-bottom: 2px solid #ddd;
+                border-top-left-radius: 5px;
+                border-top-right-radius: 5px;
+            }
+            
+            .right-page {
+                border-left: none;
+                border-bottom-left-radius: 5px;
+                border-bottom-right-radius: 5px;
+            }
+            
+            .reader-header {
+                padding: 10px 15px;
+                flex-wrap: wrap;
+            }
+            
+            .reader-title {
+                font-size: 16px;
+                order: 1;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .reader-controls {
+                order: 2;
+                justify-content: center;
+                width: 100%;
+            }
+            
+            .pdf-controls {
+                bottom: 10px;
+                padding: 8px 15px;
+                gap: 10px;
+            }
+            
+            .pdf-controls button {
+                font-size: 16px;
+                padding: 6px;
+            }
+            
+            .page-info, .zoom-level {
+                font-size: 12px;
+            }
+            
+            .pdf-sidebar {
+                width: 150px;
+            }
+            
+            .pdf-sidebar.hidden {
+                transform: translateX(-100%);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .book {
+                height: 250px;
+            }
+            
+            .page {
+                padding: 15px;
+            }
+            
+            .book-shelf {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+            
+            .pdf-controls {
+                flex-wrap: wrap;
+                width: 90%;
+                padding: 8px 10px;
+                gap: 5px;
+            }
+            
+            .pdf-controls button {
+                font-size: 14px;
+                padding: 5px;
+            }
+            
+            .page-info, .zoom-level {
+                font-size: 11px;
+                min-width: 40px;
+            }
+            
+            .pdf-sidebar {
+                width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">BeteBrana</div>
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="#" id="nav-home">Home</a></li>
+                <li><a href="#" id="nav-collection">Collection</a></li>
+                <li><a href="#" id="nav-dashboard">Dashboard</a></li>
+                <li><a href="#" id="nav-login">Login</a></li>
+                <li><a href="#" id="nav-logout" style="display:none;">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Home Section -->
+        <section id="home-section">
+            <div class="book">
+                <div class="pages-container">
+                    <!-- Left Page: Table of Contents -->
+                    <div class="left-page page">
+                        <div class="page-curl"></div>
+                        <div class="table-of-contents">
+                            <h2>Table of Contents</h2>
+                            <ul>
+                                <li><a href="#home">Home</a></li>
+                                <li><a href="#collection">Collection</a></li>
+                                <li><a href="#dashboard">Dashboard</a></li>
+                                <li><a href="#about">About Us</a></li>
+                                <li><a href="/reader">reader</a></li>
+                                <li><a href="#contact">Contact</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Right Page: About Us -->
+                    <div class="right-page page">
+                        <div class="page-curl"></div>
+                        <div class="bookmark"></div>
+                        <div class="about-us">
+                            <h1>Prologue</h1>
+                            <p>Welcome to our story. We are a passionate team dedicated to creating meaningful experiences through innovation and creativity. Founded with a vision to inspire, we strive to deliver excellence in everything we do.</p>
+                            <p>Our journey began with a simple idea: to make a difference. Over the years, we have grown into a community of dreamers and doers, working together to bring ideas to life. Our values of integrity, collaboration, and innovation guide us every step of the way.</p>
+                            <p>Join us as we continue to write the next chapter of our story, creating solutions that empower and inspire.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Collection Section -->
+        <section id="collection-section" style="display:none;">
+            <h2 class="section-title">Our Book Collection</h2>
+            <div class="book-shelf" id="book-shelf">
+                <!-- Books will be dynamically loaded here -->
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="dashboard">
+            <h2 class="section-title">Your Dashboard</h2>
+            
+            <div class="dashboard-section">
+                <h3>Currently Rented Books</h3>
+                <div class="rented-books" id="rented-books">
+                    <!-- Rented books will be dynamically loaded here -->
+                </div>
+            </div>
+            
+            <div class="dashboard-section">
+                <h3>Your Queue</h3>
+                <div class="queue-list" id="queue-list">
+                    <!-- Queue items will be dynamically loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Authentication Section -->
+        <section id="auth-section" style="display:none;">
+            <div class="auth-form">
+                <h2 id="auth-title">Login</h2>
+                <div class="error-message" id="auth-error"></div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password">
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-secondary" id="auth-toggle">Switch to Register</button>
+                    <button class="btn btn-primary" id="auth-submit">
+                        <span id="auth-text">Login</span>
+                        <span class="loading" id="auth-loading" style="display: none;"></span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Book Rental Modal -->
+    <div class="modal" id="rental-modal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="modal-book-title">Rent Book</h2>
+            <p id="modal-book-details">Book details will appear here</p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                <button class="btn btn-primary" id="modal-rent">
+                    <span>Rent for 21 Days</span>
+                    <span class="loading" id="rent-loading" style="display: none;"></span>
+                </button>
+                <button class="btn btn-primary" id="modal-queue">
+                    <span>Add to Queue</span>
+                    <span class="loading" id="queue-loading" style="display: none;"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Reader - UPDATED -->
+    <div class="document-reader" id="document-reader">
+        <div class="reader-header">
+            <h2 class="reader-title" id="reader-title">Document Reader</h2>
+            <div class="reader-controls">
+                <button id="toggle-sidebar" title="Toggle Thumbnails">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button id="zoom-out" title="Zoom Out">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <button id="zoom-in" title="Zoom In">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button id="fit-width" title="Fit to Width">
+                    <i class="fas fa-arrows-alt-h"></i>
+                </button>
+                <button id="fit-page" title="Fit to Page">
+                    <i class="fas fa-arrows-alt-v"></i>
+                </button>
+                <button id="close-reader" title="Close Reader">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+        <div class="reader-content">
+            <div class="pdf-sidebar" id="pdf-sidebar">
+                <div class="pdf-thumbnails" id="pdf-thumbnails">
+                    <!-- Thumbnails will be loaded here -->
+                </div>
+            </div>
+            <div id="pdf-viewer" style="display: none;"></div>
+            <div id="word-content" class="word-content" style="display: none;"></div>
+            <div id="loading-reader" class="loading-reader">
+                <div class="loading"></div>
+                <div>Loading document...</div>
+            </div>
+            
+            <!-- Enhanced PDF Controls -->
+            <div class="pdf-controls" id="pdf-controls" style="display: none;">
+                <button id="first-page" title="First Page">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+                <button id="prev-page" title="Previous Page">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="page-info">
+                    Page <span id="current-page">1</span> of <span id="total-pages">1</span>
+                </div>
+                <button id="next-page" title="Next Page">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button id="last-page" title="Last Page">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+                <div class="zoom-controls">
+                    <button id="zoom-out-btn" title="Zoom Out">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <div class="zoom-level">
+                        <span id="zoom-level">100%</span>
+                    </div>
+                    <button id="zoom-in-btn" title="Zoom In">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security overlay to prevent downloading -->
+    <!-- <div class="security-overlay" id="security-overlay" style="display: none;"></div> -->
+
+    <script>
+        // PDF.js configuration
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+        // Global state
+        let currentUser = null;
+        let currentToken = null;
+        let books = [];
+        let userRentals = [];
+        let userQueue = [];
+        let selectedBook = null;
+
+        // Document reader variables
+        let currentPdf = null;
+        let currentPage = 1;
+        let totalPages = 1;
+        let pdfScale = 1.0;
+        let pdfThumbnails = [];
+        let sidebarVisible = true;
+
+        // DOM elements
+        const homeSection = document.getElementById('home-section');
+        const collectionSection = document.getElementById('collection-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const authSection = document.getElementById('auth-section');
+        const bookShelf = document.getElementById('book-shelf');
+        const rentedBooks = document.getElementById('rented-books');
+        const queueList = document.getElementById('queue-list');
+        const rentalModal = document.getElementById('rental-modal');
+        const documentReader = document.getElementById('document-reader');
+        const authError = document.getElementById('auth-error');
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const navLinks = document.getElementById('nav-links');
+
+        // Navigation elements
+        const navHome = document.getElementById('nav-home');
+        const navCollection = document.getElementById('nav-collection');
+        const navDashboard = document.getElementById('nav-dashboard');
+        const navLogin = document.getElementById('nav-login');
+        const navLogout = document.getElementById('nav-logout');
+
+        // Authentication elements
+        const authTitle = document.getElementById('auth-title');
+        const authToggle = document.getElementById('auth-toggle');
+        const authSubmit = document.getElementById('auth-submit');
+        const authText = document.getElementById('auth-text');
+        const authLoading = document.getElementById('auth-loading');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+        // Modal elements
+        const modalBookTitle = document.getElementById('modal-book-title');
+        const modalBookDetails = document.getElementById('modal-book-details');
+        const modalCancel = document.getElementById('modal-cancel');
+        const modalRent = document.getElementById('modal-rent');
+        const modalQueue = document.getElementById('modal-queue');
+        const rentLoading = document.getElementById('rent-loading');
+        const queueLoading = document.getElementById('queue-loading');
+
+        // Reader elements - UPDATED
+        const readerTitle = document.getElementById('reader-title');
+        const prevPageBtn = document.getElementById('prev-page');
+        const nextPageBtn = document.getElementById('next-page');
+        const firstPageBtn = document.getElementById('first-page');
+        const lastPageBtn = document.getElementById('last-page');
+        const closeReaderBtn = document.getElementById('close-reader');
+        const currentPageSpan = document.getElementById('current-page');
+        const totalPagesSpan = document.getElementById('total-pages');
+        const pdfViewer = document.getElementById('pdf-viewer');
+        const wordContent = document.getElementById('word-content');
+        const loadingReader = document.getElementById('loading-reader');
+        const securityOverlay = document.getElementById('security-overlay');
+        const pdfControls = document.getElementById('pdf-controls');
+        const pdfSidebar = document.getElementById('pdf-sidebar');
+        const pdfThumbnailsContainer = document.getElementById('pdf-thumbnails');
+        const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+        const zoomOutBtn = document.getElementById('zoom-out-btn');
+        const zoomInBtn = document.getElementById('zoom-in-btn');
+        const zoomLevelSpan = document.getElementById('zoom-level');
+        const fitWidthBtn = document.getElementById('fit-width');
+        const fitPageBtn = document.getElementById('fit-page');
+        const zoomOutHeaderBtn = document.getElementById('zoom-out');
+        const zoomInHeaderBtn = document.getElementById('zoom-in');
+
+        // API base URL
+        const API_BASE = 'http://localhost:3000/api';
+
+        // Initialize the application
+        async function init() {
+            // Check for existing token
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (token && user) {
+                currentToken = token;
+                currentUser = JSON.parse(user);
+                await loadUserData();
+                updateUIForUser();
+            }
+
+            // Load books
+            await loadBooks();
+
+            // Set up event listeners
+            setupEventListeners();
+        }
+
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Navigation
+            navHome.addEventListener('click', () => showSection('home'));
+            navCollection.addEventListener('click', () => showSection('collection'));
+            navDashboard.addEventListener('click', () => showSection('dashboard'));
+            navLogin.addEventListener('click', () => showSection('auth'));
+            navLogout.addEventListener('click', logout);
+            
+            // Mobile menu toggle
+            mobileMenuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('show');
+            });
+
+            // Authentication
+            authToggle.addEventListener('click', toggleAuthMode);
+            authSubmit.addEventListener('click', handleAuth);
+
+            // Modal
+            modalCancel.addEventListener('click', () => rentalModal.style.display = 'none');
+            modalRent.addEventListener('click', rentBook);
+            modalQueue.addEventListener('click', addToQueue);
+
+            // Reader - UPDATED
+            prevPageBtn.addEventListener('click', goToPrevPage);
+            nextPageBtn.addEventListener('click', goToNextPage);
+            firstPageBtn.addEventListener('click', goToFirstPage);
+            lastPageBtn.addEventListener('click', goToLastPage);
+            closeReaderBtn.addEventListener('click', closeDocumentReader);
+            toggleSidebarBtn.addEventListener('click', toggleSidebar);
+            zoomOutBtn.addEventListener('click', zoomOut);
+            zoomInBtn.addEventListener('click', zoomIn);
+            zoomOutHeaderBtn.addEventListener('click', zoomOut);
+            zoomInHeaderBtn.addEventListener('click', zoomIn);
+            fitWidthBtn.addEventListener('click', fitToWidth);
+            fitPageBtn.addEventListener('click', fitToPage);
+
+            // Security measures
+            document.addEventListener('contextmenu', preventRightClick);
+            document.addEventListener('keydown', preventSaveShortcuts);
+            
+            // Handle window resize for responsive layout
+            window.addEventListener('resize', handleResize);
+        }
+
+        // Handle window resize
+        function handleResize() {
+            if (currentPdf && pdfViewer.style.display !== 'none') {
+                // Re-render current page with updated dimensions
+                renderPdfPage(currentPage);
+            }
+        }
+
+        // Show the specified section
+        function showSection(section) {
+            homeSection.style.display = 'none';
+            collectionSection.style.display = 'none';
+            dashboardSection.style.display = 'none';
+            authSection.style.display = 'none';
+            authError.style.display = 'none';
+            
+            // Close mobile menu if open
+            navLinks.classList.remove('show');
+
+            switch(section) {
+                case 'home':
+                    homeSection.style.display = 'block';
+                    break;
+                case 'collection':
+                    collectionSection.style.display = 'block';
+                    break;
+                case 'dashboard':
+                    if (currentUser) {
+                        dashboardSection.style.display = 'block';
+                        loadDashboardData();
+                    } else {
+                        showSection('auth');
+                    }
+                    break;
+                case 'auth':
+                    authSection.style.display = 'block';
+                    break;
+            }
+        }
+
+        // API helper function
+        async function apiCall(endpoint, options = {}) {
+            const url = `${API_BASE}${endpoint}`;
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                },
+                ...options
+            };
+
+            if (currentToken) {
+                config.headers.Authorization = `Bearer ${currentToken}`;
+            }
+
+            if (options.body) {
+                config.body = JSON.stringify(options.body);
+            }
+
+            try {
+                const response = await fetch(url, config);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Request failed');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('API call error:', error);
+                throw error;
+            }
+        }
+
+        // Load books from API
+        async function loadBooks() {
+            try {
+                books = await apiCall('/books');
+                renderBooks();
+            } catch (error) {
+                console.error('Error loading books:', error);
+                alert('Error loading books. Please try again.');
+            }
+        }
+
+        // Render books on the shelf
+        function renderBooks() {
+            bookShelf.innerHTML = '';
+            
+            if (books.length === 0) {
+                bookShelf.innerHTML = '<p>No books available</p>';
+                return;
+            }
+            
+            books.forEach(book => {
+                const bookElement = document.createElement('div');
+                bookElement.className = 'book-item';
+                bookElement.dataset.id = book.id;
+                
+                const statusClass = book.available_copies > 0 ? 'available' : 'unavailable';
+                const statusText = book.available_copies > 0 ? 'Available' : 'Unavailable';
+                const fileType = book.file_type ? book.file_type.toUpperCase() : 'PDF';
+                
+                bookElement.innerHTML = `
+                    <div class="book-cover">${book.title}</div>
+                    <div class="book-title">${book.title} <span class="file-type">${fileType}</span></div>
+                    <div class="book-author">by ${book.author}</div>
+                    <div class="book-status ${statusClass}">${statusText} (${book.available_copies}/${book.total_copies})</div>
+                `;
+                
+                bookElement.addEventListener('click', () => openRentalModal(book));
+                bookShelf.appendChild(bookElement);
+            });
+        }
+
+        // Open the rental modal for a specific book
+        function openRentalModal(book) {
+            selectedBook = book;
+            modalBookTitle.textContent = book.title;
+            modalBookDetails.textContent = `${book.description}. Copies available: ${book.available_copies}/${book.total_copies}`;
+            
+            // Show/hide buttons based on availability and user status
+            if (book.available_copies > 0) {
+                modalRent.style.display = 'block';
+                modalQueue.style.display = 'block';
+            } else {
+                modalRent.style.display = 'none';
+                modalQueue.style.display = 'block';
+            }
+            
+            rentalModal.style.display = 'flex';
+        }
+
+        // Rent the selected book
+        async function rentBook() {
+            if (!currentUser) {
+                alert('Please log in to rent books');
+                showSection('auth');
+                rentalModal.style.display = 'none';
+                return;
+            }
+            
+            // Show loading state
+            modalRent.disabled = true;
+            rentLoading.style.display = 'inline-block';
+            
+            try {
+                await apiCall('/books/rent', {
+                    method: 'POST',
+                    body: { bookId: selectedBook.id }
+                });
+                
+                alert(`You have successfully rented "${selectedBook.title}" for 21 days`);
+                rentalModal.style.display = 'none';
+                
+                // Reload data
+                await loadBooks();
+                await loadUserData();
+                
+            } catch (error) {
+                console.error('Error renting book:', error);
+                alert('Error renting book: ' + error.message);
+            } finally {
+                // Reset loading state
+                modalRent.disabled = false;
+                rentLoading.style.display = 'none';
+            }
+        }
+
+        // Add book to queue
+        async function addToQueue() {
+            if (!currentUser) {
+                alert('Please log in to add books to your queue');
+                showSection('auth');
+                rentalModal.style.display = 'none';
+                return;
+            }
+            
+            // Show loading state
+            modalQueue.disabled = true;
+            queueLoading.style.display = 'inline-block';
+            
+            try {
+                await apiCall('/queue/add', {
+                    method: 'POST',
+                    body: { bookId: selectedBook.id }
+                });
+                
+                alert(`"${selectedBook.title}" has been added to your queue`);
+                rentalModal.style.display = 'none';
+                
+                // Reload user data
+                await loadUserData();
+                
+            } catch (error) {
+                console.error('Error adding to queue:', error);
+                alert('Error adding to queue: ' + error.message);
+            } finally {
+                // Reset loading state
+                modalQueue.disabled = false;
+                queueLoading.style.display = 'none';
+            }
+        }
+
+        // Toggle between login and register modes
+        function toggleAuthMode() {
+            const isLogin = authTitle.textContent === 'Login';
+            authTitle.textContent = isLogin ? 'Register' : 'Login';
+            authToggle.textContent = isLogin ? 'Switch to Login' : 'Switch to Register';
+            authText.textContent = isLogin ? 'Register' : 'Login';
+        }
+
+        // Handle authentication (login/register)
+        async function handleAuth() {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            const name = email.split('@')[0]; // Default name from email
+            
+            if (!email || !password) {
+                showAuthError('Please enter both email and password');
+                return;
+            }
+            
+            // Show loading state
+            authSubmit.disabled = true;
+            authText.style.display = 'none';
+            authLoading.style.display = 'inline-block';
+            
+            const isLogin = authTitle.textContent === 'Login';
+            
+            try {
+                const endpoint = isLogin ? '/auth/login' : '/auth/register';
+                const body = isLogin ? { email, password } : { email, password, name };
+                
+                const result = await apiCall(endpoint, {
+                    method: 'POST',
+                    body: body
+                });
+                
+                // Store token and user
+                currentToken = result.token;
+                currentUser = result.user;
+                
+                localStorage.setItem('token', currentToken);
+                localStorage.setItem('user', JSON.stringify(currentUser));
+                
+                // Clear form and error
+                emailInput.value = '';
+                passwordInput.value = '';
+                authError.style.display = 'none';
+                
+                // Load user data and update UI
+                await loadUserData();
+                updateUIForUser();
+                showSection('dashboard');
+                
+                alert(result.message || 'Success!');
+                
+            } catch (error) {
+                console.error('Auth error:', error);
+                showAuthError(error.message);
+            } finally {
+                // Reset loading state
+                authSubmit.disabled = false;
+                authText.style.display = 'inline-block';
+                authLoading.style.display = 'none';
+            }
+        }
+
+        // Show authentication error
+        function showAuthError(message) {
+            authError.textContent = message;
+            authError.style.display = 'block';
+        }
+
+        // Log out the current user
+        function logout() {
+            currentToken = null;
+            currentUser = null;
+            userRentals = [];
+            userQueue = [];
+            
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            
+            updateUIForUser();
+            showSection('home');
+        }
+
+        // Update UI when user logs in or out
+        function updateUIForUser() {
+            if (currentUser) {
+                navLogin.style.display = 'none';
+                navLogout.style.display = 'block';
+                navDashboard.style.display = 'block';
+            } else {
+                navLogin.style.display = 'block';
+                navLogout.style.display = 'none';
+                navDashboard.style.display = 'none';
+            }
+        }
+
+        // Load user data
+        async function loadUserData() {
+            if (!currentUser) return;
+            
+            try {
+                // Load rentals
+                userRentals = await apiCall('/user/rentals');
+                
+                // Load queue
+                userQueue = await apiCall('/user/queue');
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            await loadUserData();
+            renderRentedBooks();
+            renderQueue();
+        }
+
+        // Render rented books in dashboard
+        function renderRentedBooks() {
+            rentedBooks.innerHTML = '';
+            
+            if (userRentals.length === 0) {
+                rentedBooks.innerHTML = '<p>You have no rented books</p>';
+            } else {
+                userRentals.forEach(rental => {
+                    const rentalElement = document.createElement('div');
+                    rentalElement.className = 'book-item';
+                    
+                    rentalElement.innerHTML = `
+                        <div class="book-cover">${rental.title}</div>
+                        <div class="book-title">${rental.title}</div>
+                        <div class="book-author">by ${rental.author}</div>
+                        <div class="book-status">Due: ${new Date(rental.due_date).toLocaleDateString()}</div>
+                        <button class="btn btn-primary" style="margin-top: 10px; width: 100%;" data-id="${rental.id}">Read</button>
+                        <button class="btn btn-secondary" style="margin-top: 5px; width: 100%;" data-id="${rental.id}" data-book-id="${rental.book_id}">Return</button>
+                    `;
+                    
+                    // Add event listeners for the buttons
+                    rentalElement.querySelector('.btn-primary').addEventListener('click', (e) => {
+                        const rentalId = e.target.dataset.id;
+                        openDocumentReader(rentalId);
+                    });
+                    
+                    rentalElement.querySelector('.btn-secondary').addEventListener('click', (e) => {
+                        const rentalId = e.target.dataset.id;
+                        const bookId = e.target.dataset.bookId;
+                        returnBook(rentalId, bookId);
+                    });
+                    
+                    rentedBooks.appendChild(rentalElement);
+                });
+            }
+        }
+
+        // Render queue in dashboard
+        function renderQueue() {
+            queueList.innerHTML = '';
+            
+            if (userQueue.length === 0) {
+                queueList.innerHTML = '<p>Your queue is empty</p>';
+            } else {
+                userQueue.forEach(item => {
+                    const queueElement = document.createElement('div');
+                    queueElement.className = 'book-item';
+                    
+                    queueElement.innerHTML = `
+                        <div class="book-cover">${item.title}</div>
+                        <div class="book-title">${item.title}</div>
+                        <div class="book-author">by ${item.author}</div>
+                        <div class="book-status">Added: ${new Date(item.added_at).toLocaleDateString()}</div>
+                        <button class="btn btn-secondary" style="margin-top: 10px; width: 100%;" data-id="${item.id}">Remove</button>
+                    `;
+                    
+                    queueElement.querySelector('.btn-secondary').addEventListener('click', (e) => {
+                        const queueId = e.target.dataset.id;
+                        removeFromQueue(queueId);
+                    });
+                    
+                    queueList.appendChild(queueElement);
+                });
+            }
+        }
+
+        // Open the document reader
+        async function openDocumentReader(rentalId) {
+            try {
+                const rental = userRentals.find(r => r.id == rentalId);
+                if (!rental) return;
+
+                // Show loading
+                showReaderLoading(true);
+                
+                // Get document info from server
+                const response = await apiCall(`/books/${rental.book_id}/read`);
+                
+                readerTitle.textContent = `${rental.title} - ${rental.author}`;
+                
+                // Show security overlay
+                securityOverlay.style.display = 'block';
+                
+                // Load document based on file type
+                await loadDocument(response.book);
+                
+                documentReader.style.display = 'flex';
+                
+            } catch (error) {
+                console.error('Error opening reader:', error);
+                alert('Error opening document: ' + error.message);
+                showReaderLoading(false);
+            }
+        }
+
+        // Load document based on file type
+        async function loadDocument(book) {
+            const fileUrl = `http://localhost:3000${book.file_path}`;
+            
+            switch(book.file_type) {
+                case 'pdf':
+                    await loadPdfDocument(fileUrl);
+                    break;
+                case 'docx':
+                case 'doc':
+                    await loadWordDocument(fileUrl);
+                    break;
+                default:
+                    await loadTextDocument(fileUrl);
+            }
+        }
+
+        // Load PDF document - UPDATED
+        async function loadPdfDocument(url) {
+            try {
+                showReaderLoading(true);
+                
+                // Load PDF
+                currentPdf = await pdfjsLib.getDocument(url).promise;
+                totalPages = currentPdf.numPages;
+                currentPage = 1;
+                pdfScale = 1.0;
+                
+                // Show PDF controls
+                pdfControls.style.display = 'flex';
+                
+                // Show PDF viewer
+                pdfViewer.style.display = 'block';
+                wordContent.style.display = 'none';
+                
+                // Load thumbnails
+                await loadThumbnails();
+                
+                // Render first page
+                await renderPdfPage(currentPage);
+                showReaderLoading(false);
+                
+            } catch (error) {
+                console.error('PDF loading error:', error);
+                throw new Error('Failed to load PDF document');
+            }
+        }
+
+        // Load PDF thumbnails
+        async function loadThumbnails() {
+            pdfThumbnailsContainer.innerHTML = '';
+            pdfThumbnails = [];
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const page = await currentPdf.getPage(i);
+                const viewport = page.getViewport({ scale: 0.2 });
+                
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                
+                await page.render(renderContext).promise;
+                
+                const thumbnailDiv = document.createElement('div');
+                thumbnailDiv.className = 'pdf-thumbnail';
+                if (i === 1) thumbnailDiv.classList.add('active');
+                thumbnailDiv.dataset.page = i;
+                
+                const pageNumberDiv = document.createElement('div');
+                pageNumberDiv.className = 'thumbnail-page-number';
+                pageNumberDiv.textContent = i;
+                
+                thumbnailDiv.appendChild(canvas);
+                thumbnailDiv.appendChild(pageNumberDiv);
+                
+                thumbnailDiv.addEventListener('click', () => {
+                    goToPage(i);
+                });
+                
+                pdfThumbnailsContainer.appendChild(thumbnailDiv);
+                pdfThumbnails.push(thumbnailDiv);
+            }
+        }
+
+        // Render PDF page - UPDATED
+        async function renderPdfPage(pageNum) {
+            pdfViewer.innerHTML = '';
+            
+            const page = await currentPdf.getPage(pageNum);
+            const viewport = page.getViewport({ scale: pdfScale });
+            
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            
+            const renderContext = {
+                canvasContext: context,
+                viewport: viewport
+            };
+            
+            await page.render(renderContext).promise;
+            
+            const pageContainer = document.createElement('div');
+            pageContainer.className = 'pdf-page-container';
+            
+            const pageNumberDiv = document.createElement('div');
+            pageNumberDiv.className = 'pdf-page-number';
+            pageNumberDiv.textContent = pageNum;
+            
+            pageContainer.appendChild(canvas);
+            pageContainer.appendChild(pageNumberDiv);
+            pdfViewer.appendChild(pageContainer);
+            
+            // Update page info
+            currentPageSpan.textContent = pageNum;
+            totalPagesSpan.textContent = totalPages;
+            currentPage = pageNum;
+            
+            // Update button states
+            prevPageBtn.disabled = pageNum <= 1;
+            nextPageBtn.disabled = pageNum >= totalPages;
+            firstPageBtn.disabled = pageNum <= 1;
+            lastPageBtn.disabled = pageNum >= totalPages;
+            
+            // Update zoom level
+            zoomLevelSpan.textContent = `${Math.round(pdfScale * 100)}%`;
+            
+            // Update active thumbnail
+            pdfThumbnails.forEach(thumb => {
+                thumb.classList.remove('active');
+                if (parseInt(thumb.dataset.page) === pageNum) {
+                    thumb.classList.add('active');
+                }
+            });
+            
+            // Scroll to active thumbnail
+            const activeThumb = pdfThumbnails.find(thumb => parseInt(thumb.dataset.page) === pageNum);
+            if (activeThumb) {
+                activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // Load Word document
+        async function loadWordDocument(url) {
+            try {
+                showReaderLoading(true);
+                
+                // For Word documents, we would need a backend conversion
+                // For now, we'll show a message
+                wordContent.innerHTML = `
+                    <div style="text-align: center; padding: 50px;">
+                        <h3>Word Document Viewer</h3>
+                        <p>Word document support requires server-side processing.</p>
+                        <p>For now, you can download and view the document using Microsoft Word or similar software.</p>
+                        <p><em>File: ${url}</em></p>
+                    </div>
+                `;
+                
+                pdfViewer.style.display = 'none';
+                wordContent.style.display = 'block';
+                pdfControls.style.display = 'none';
+                
+                showReaderLoading(false);
+                
+            } catch (error) {
+                console.error('Word document error:', error);
+                throw new Error('Failed to load Word document');
+            }
+        }
+
+        // Load text document
+        async function loadTextDocument(url) {
+            try {
+                showReaderLoading(true);
+                
+                const response = await fetch(url);
+                const text = await response.text();
+                
+                wordContent.innerHTML = `
+                    <div style="white-space: pre-wrap; font-family: 'Georgia', serif;">
+                        ${text}
+                    </div>
+                `;
+                
+                pdfViewer.style.display = 'none';
+                wordContent.style.display = 'block';
+                pdfControls.style.display = 'none';
+                
+                showReaderLoading(false);
+                
+            } catch (error) {
+                console.error('Text document error:', error);
+                throw new Error('Failed to load text document');
+            }
+        }
+
+        // Show/hide loading
+        function showReaderLoading(show) {
+            loadingReader.style.display = show ? 'flex' : 'none';
+        }
+
+        // PDF navigation - UPDATED
+        async function goToPage(pageNum) {
+            if (pageNum >= 1 && pageNum <= totalPages) {
+                await renderPdfPage(pageNum);
+            }
+        }
+
+        async function goToPrevPage() {
+            if (currentPage > 1) {
+                await goToPage(currentPage - 1);
+            }
+        }
+
+        async function goToNextPage() {
+            if (currentPage < totalPages) {
+                await goToPage(currentPage + 1);
+            }
+        }
+
+        async function goToFirstPage() {
+            await goToPage(1);
+        }
+
+        async function goToLastPage() {
+            await goToPage(totalPages);
+        }
+
+        // PDF zoom controls - NEW
+        async function zoomIn() {
+            if (pdfScale < 3.0) {
+                pdfScale += 0.1;
+                await renderPdfPage(currentPage);
+            }
+        }
+
+        async function zoomOut() {
+            if (pdfScale > 0.5) {
+                pdfScale -= 0.1;
+                await renderPdfPage(currentPage);
+            }
+        }
+
+        async function fitToWidth() {
+            if (!currentPdf) return;
+            
+            const page = await currentPdf.getPage(currentPage);
+            const viewport = page.getViewport({ scale: 1.0 });
+            
+            const containerWidth = pdfViewer.clientWidth - 40; // Account for padding
+            pdfScale = containerWidth / viewport.width;
+            
+            await renderPdfPage(currentPage);
+        }
+
+        async function fitToPage() {
+            if (!currentPdf) return;
+            
+            const page = await currentPdf.getPage(currentPage);
+            const viewport = page.getViewport({ scale: 1.0 });
+            
+            const containerWidth = pdfViewer.clientWidth - 40; // Account for padding
+            const containerHeight = pdfViewer.clientHeight - 40;
+            
+            const widthScale = containerWidth / viewport.width;
+            const heightScale = containerHeight / viewport.height;
+            
+            pdfScale = Math.min(widthScale, heightScale);
+            
+            await renderPdfPage(currentPage);
+        }
+
+        // Toggle sidebar - NEW
+        function toggleSidebar() {
+            sidebarVisible = !sidebarVisible;
+            pdfSidebar.classList.toggle('hidden', !sidebarVisible);
+        }
+
+        // Close document reader
+        function closeDocumentReader() {
+            documentReader.style.display = 'none';
+            securityOverlay.style.display = 'none';
+            
+            // Clean up
+            if (currentPdf) {
+                currentPdf.destroy();
+                currentPdf = null;
+            }
+            
+            // Reset state
+            currentPage = 1;
+            pdfScale = 1.0;
+            pdfThumbnails = [];
+            sidebarVisible = true;
+            pdfSidebar.classList.remove('hidden');
+        }
+
+        // Return a rented book
+        async function returnBook(rentalId, bookId) {
+            try {
+                await apiCall('/books/return', {
+                    method: 'POST',
+                    body: {
+                        rentalId: rentalId,
+                        bookId: bookId
+                    }
+                });
+                
+                alert('Book returned successfully');
+                
+                // Reload data
+                await loadBooks();
+                await loadUserData();
+                renderRentedBooks();
+                
+            } catch (error) {
+                console.error('Error returning book:', error);
+                alert('Error returning book: ' + error.message);
+            }
+        }
+
+        // Remove a book from queue
+        async function removeFromQueue(queueId) {
+            try {
+                await apiCall('/queue/remove', {
+                    method: 'DELETE',
+                    body: { queueId: queueId }
+                });
+                
+                // Reload user data
+                await loadUserData();
+                renderQueue();
+                
+            } catch (error) {
+                console.error('Error removing from queue:', error);
+                alert('Error removing from queue: ' + error.message);
+            }
+        }
+
+        // Security measures
+        function preventRightClick(e) {
+            if (documentReader.style.display === 'flex') {
+                e.preventDefault();
+                return false;
+            }
+        }
+
+        function preventSaveShortcuts(e) {
+            if (documentReader.style.display === 'flex') {
+                if (e.ctrlKey && (e.key === 's' || e.key === 'p')) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        }
+
+        // Initialize the app when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
