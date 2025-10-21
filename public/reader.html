@@ -33,7 +33,7 @@
             height: 85vh;
             max-height: 800px;
             display: flex;
-            background-color: #8B4513;
+            background-color: #8B4513!important;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
             border-radius: 10px;
             position: relative;
@@ -57,7 +57,7 @@
             width: 50%;
             padding: 20px;
             box-sizing: border-box;
-            background-color: #fff;
+            background-color: #8B4513; /* SaddleBrown for the cover */
             position: relative;
             display: flex;
             flex-direction: column;
@@ -1080,15 +1080,22 @@
                     <!-- Mobile Navigation -->
                     <div class="mobile-nav">
                         <div class="mobile-nav-title">My Library</div>
+                        
                         <div class="mobile-nav-tabs">
                             <div class="mobile-nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">Rented</div>
                             <div class="mobile-nav-tab" :class="{ active: currentTab === 'queue' }" @click="currentTab = 'queue'">Queue</div>
+                            
+
                         </div>
                     </div>
                     
                     <div class="nav-tabs">
                         <div class="nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">Rented Books</div>
                         <div class="nav-tab" :class="{ active: currentTab === 'queue' }" @click="currentTab = 'queue'">Your Queue</div>
+                                                                    <el-button icon="el-icon-s-operation" circle @click="showSettings" size="small" style="margin-left: 220px; padding-left: 10px; margin-bottom:5px; width:40px; height:40px"></el-button>
+
+                        <el-button icon="el-icon-switch-button" circle @click="logout" size="small" style=" margin-bottom:5px; width:40px; height:40px"></el-button>
+
                     </div>
                     
                     <!-- Currently Rented Books -->
@@ -1314,7 +1321,7 @@
         </el-dialog>
         
         <!-- Settings Dialog -->
-        <el-dialog title="Reading Settings" :visible.sync="settingsVisible" width="400px" :class="`theme-${theme}`">
+        <el-dialog title="Reading Settings" :visible.sync="settingsVisible"    width="400px" :class="`theme-${theme}`">
             <el-form label-width="100px">
                 <el-form-item label="Theme">
                     <el-radio-group v-model="theme" @change="applyTheme" class="theme-selector">
@@ -2372,6 +2379,7 @@ getQueueDisplay(book) {
                 
                 showSettings() {
                     this.settingsVisible = true;
+                    
                 },
                 
                 updateProgress() {
