@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeteBrana - Our Story</title>
+    <style>
+        /* General body styling with a subtle pattern to resemble a surface */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #dcdcdc; /* Light gray background */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"><rect width="10" height="10" fill="%23dcdcdc"/><path d="M-1,1l2,-2m0,4l2,-2m0,4l2,-2" stroke="%23c0c0c0" stroke-width="1"/></svg>');
+            font-family: 'Georgia', serif;
+        }
+
+        /* The main book container, now styled to look like the cover */
+        .book {
+            width: 800px;
+            height: 500px;
+            display: flex;
+            background-color: #8B4513; /* SaddleBrown for the cover */
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); /* Increased shadow for more depth */
+            border-radius: 10px;
+            position: relative;
+            transform-style: preserve-3d;
+            /* Adjusted transform to be flat on the table, no rotation */
+            transform: perspective(2000px); 
+            padding: 5px; /* Decreased padding for a thinner cover feel */
+        }
+
+        /* The container for the white pages */
+        .pages-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            background-color: #fff;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        /* Styles for each page */
+        .page {
+            width: 50%;
+            padding: 40px;
+            box-sizing: border-box;
+            background-color: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+        
+        /* Left page specific styles */
+        .left-page {
+            border-right: 2px solid #ddd;
+            box-shadow: inset 5px 0 10px rgba(0, 0, 0, 0.1);
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+            transform-origin: right;
+            transform: rotateY(15deg); /* Increased rotation for a more pronounced curve */
+            z-index: 2; /* Ensure the left page is above the right page at the center */
+        }
+
+        /* Right page specific styles */
+        .right-page {
+            border-left: 2px solid #ddd;
+            box-shadow: inset -5px 0 10px rgba(0, 0, 0, 0.1);
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+            transform-origin: left;
+            transform: rotateY(-15deg); /* Increased rotation for a more pronounced curve */
+            z-index: 1; /* Right page is behind left page at the center */
+        }
+
+        /* Table of contents styling */
+        .table-of-contents h2 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .table-of-contents ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .table-of-contents li {
+            margin: 15px 0;
+        }
+
+        .table-of-contents a {
+            text-decoration: none;
+            color: #333;
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+
+        .table-of-contents a:hover {
+            color: #007bff;
+        }
+
+        /* About us section styling */
+        .about-us {
+            max-height: 100%;
+            overflow-y: auto; /* Adds a scrollbar if content overflows */
+        }
+
+        .about-us h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .about-us p {
+            line-height: 1.6;
+            font-size: 16px;
+            text-align: justify;
+            margin-bottom: 15px;
+        }
+        
+        /* The bookmark styling has been updated to match the image better */
+        .bookmark {
+            position: absolute;
+            top: 0;
+            right: 20px; /* Adjusted position */
+            width: 20px; /* Thinner bookmark */
+            height: 60px; /* Shorter bookmark */
+            background-color: #8B4513; /* Same color as the book cover */
+            z-index: 10;
+            clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%); /* Creates the pointed bottom */
+        }
+        
+        /* Page curl effect (Now a static shadow) */
+        .left-page .page-curl {
+            position: absolute;
+            top: 0;
+            right: -10px;
+            width: 10px;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent);
+            z-index: 1;
+        }
+
+        .right-page .page-curl {
+            position: absolute;
+            top: 0;
+            left: -10px;
+            width: 10px;
+            height: 100%;
+            background: linear-gradient(to left, rgba(0, 0, 0, 0.1), transparent);
+            z-index: 1;
+        }
+        
+        /* Responsive design for smaller screens */
+        @media (max-width: 600px) {
+            body {
+                background-color: #fff;
+            }
+
+            .book {
+                width: 90%;
+                height: auto;
+                flex-direction: column;
+                box-shadow: none;
+                border-radius: 0;
+                padding: 0;
+                transform: none; /* Remove 3D transforms on small screens */
+            }
+            
+            .pages-container {
+                flex-direction: column;
+            }
+
+            .page {
+                width: 100%;
+                border: none;
+                box-shadow: none;
+                border-radius: 0;
+                padding: 20px;
+                transform: none; /* Remove 3D transforms on small screens */
+            }
+
+            .left-page, .right-page {
+                border: none;
+            }
+
+            .left-page {
+                border-bottom: 2px solid #ddd;
+            }
+
+            .bookmark {
+                right: 20px;
+                height: 40px;
+                width: 30px;
+            }
+            
+            .bookmark::after {
+                border-left: 10px solid transparent;
+                border-right: 10px solid transparent;
+                border-top: 10px solid #fff;
+            }
+
+            .page-curl {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="book">
+        <div class="pages-container">
+            <!-- Left Page: Table of Contents -->
+            <div class="left-page page">
+                <div class="page-curl"></div>
+                <div class="table-of-contents">
+                    <h2>Table of Contents</h2>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#portfolio">Portfolio</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Right Page: About Us -->
+            <div class="right-page page">
+                <div class="page-curl"></div>
+                <div class="bookmark"></div>
+                <div class="about-us">
+                    <h1>Prologue</h1>
+                    <p>Welcome to our story. We are a passionate team dedicated to creating meaningful experiences through innovation and creativity. Founded with a vision to inspire, we strive to deliver excellence in everything we do.</p>
+                    <p>Our journey began with a simple idea: to make a difference. Over the years, we have grown into a community of dreamers and doers, working together to bring ideas to life. Our values of integrity, collaboration, and innovation guide us every step of the way.</p>
+                    <p>Join us as we continue to write the next chapter of our story, creating solutions that empower and inspire.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript to handle navigation links
+        document.querySelectorAll('.table-of-contents a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevents the default anchor link behavior
+                console.log(`Navigating to ${e.target.textContent}`);
+                // In a real application, you would add logic here to load content dynamically
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+

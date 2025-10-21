@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 app.use('/documents', express.static('documents'));
+app.use('/covers', express.static('covers'));
 
 // File upload configuration
 const storage = multer.diskStorage({
@@ -112,10 +113,9 @@ async function initializeDatabase() {
     `);
 
     // Create documents directory if it doesn't exist
-    if (!fs.existsSync('documents') && !fs.existsSync('cover')) {
-      fs.mkdirSync('documents', { recursive: true });
-      fs.mkdirSync('covers', { recursive: true });
-    }
+   if (!fs.existsSync('documents')) fs.mkdirSync('documents', { recursive: true });
+if (!fs.existsSync('covers')) fs.mkdirSync('covers', { recursive: true });
+
 
     connection.release();
     console.log('Database initialized successfully');
@@ -142,6 +142,57 @@ function authenticateToken(req, res, next) {
   });
 }
 
+// Helper function to process queue when book is returned
+async function processQueue(bookId) {
+  try {
+    const [books] = await pool.execute('SELECT * FROM books WHERE id = ?', [bookId]);
+    if (books.length === 0) return;
+
+    const book = books[0];
+    
+    if (book.available_copies > 0) {
+      // Get first person in queue
+      const [queueItems] = await pool.execute(`
+          SELECT * FROM queue 
+          WHERE book_id = ? 
+          ORDER BY added_at ASC 
+          LIMIT 1
+      `, [bookId]);
+
+      if (queueItems.length > 0) {
+        const firstInQueue = queueItems[0];
+        
+        // Here you would typically send a notification
+        console.log(`Book "${book.title}" is now available. Notifying user ${firstInQueue.user_id} who is first in queue.`);
+        
+        // You can implement email/notification logic here
+        // For now, we'll just log it
+      }
+    }
+  } catch (error) {
+    console.error('Process queue error:', error);
+  }
+}
+
+// Clean up expired queue entries (call this periodically)
+async function cleanupExpiredQueue() {
+  try {
+    // Delete queue entries older than 2 days where user hasn't rented
+    const result = await pool.execute(`
+        DELETE q FROM queue q
+        LEFT JOIN rentals r ON q.book_id = r.book_id AND q.user_id = r.user_id AND r.status = 'active'
+        WHERE q.added_at < DATE_SUB(NOW(), INTERVAL 2 DAY)
+        AND r.id IS NULL
+    `);
+
+    console.log(`Cleaned up ${result[0].affectedRows} expired queue entries`);
+    return result[0].affectedRows;
+  } catch (error) {
+    console.error('Queue cleanup error:', error);
+    return 0;
+  }
+}
+
 // Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -149,7 +200,10 @@ app.get('/', (req, res) => {
 app.get('/reader', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'reader.html'));
 });
-a
+app.get('/try', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'try.html'));
+});
+
 // Test endpoint
 app.get('/api/test', async (req, res) => {
   try {
@@ -160,7 +214,7 @@ app.get('/api/test', async (req, res) => {
   }
 });
 
-// Authentication endpoints (same as before)
+// Authentication endpoints
 app.post('/api/auth/register', async (req, res) => {
   const { email, password, name } = req.body;
 
@@ -233,17 +287,56 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Books endpoints
-app.get('/api/books', async (req, res) => {
+// Books endpoints with queue information
+// Update the books endpoint to include queue information
+app.get('/api/books', authenticateToken, async (req, res) => {
   try {
+    const userId = req.user.id;
     const [books] = await pool.execute('SELECT * FROM books');
-    res.json(books);
+    
+    // Enhance each book with queue information for the current user
+    const enhancedBooks = await Promise.all(books.map(async (book) => {
+      // Get queue information for this book
+      const [queueItems] = await pool.execute(`
+        SELECT q.*, u.name, u.email 
+        FROM queue q 
+        JOIN users u ON q.user_id = u.id 
+        WHERE q.book_id = ? 
+        ORDER BY q.added_at ASC
+      `, [book.id]);
+      
+      const userPosition = queueItems.findIndex(item => item.user_id === userId) + 1;
+      const userInQueue = queueItems.some(item => item.user_id === userId);
+      const isFirstInQueue = userPosition === 1 && userInQueue;
+      
+      // Calculate if book is effectively available for this user
+      // Book is effectively available only if:
+      // 1. There are available copies AND
+      // 2. Either no one is in queue OR user is first in queue
+      const effectiveAvailable = book.available_copies > 0 && 
+                               (queueItems.length === 0 || isFirstInQueue);
+      
+      return {
+        ...book,
+        queueInfo: {
+          totalInQueue: queueItems.length,
+          userPosition: userInQueue ? userPosition : null,
+          isFirstInQueue,
+          userInQueue,
+          effectiveAvailable,
+          queueAddedAt: userInQueue ? queueItems.find(item => item.user_id === userId).added_at : null,
+          // Add this to help frontend logic
+          canJoinQueue: !userInQueue && (book.available_copies <= 0 || queueItems.length > 0)
+        }
+      };
+    }));
+    
+    res.json(enhancedBooks);
   } catch (error) {
     console.error('Books fetch error:', error);
     res.status(500).json({ error: 'Failed to fetch books' });
   }
 });
-
 // Get book document for reading
 app.get('/api/books/:id/read', authenticateToken, async (req, res) => {
   const bookId = req.params.id;
@@ -317,58 +410,87 @@ app.post('/api/books/upload', upload.single('document'), async (req, res) => {
     res.status(500).json({ error: 'Failed to upload book' });
   }
 });
-// Get user rentals - ADD THIS ENDPOINT
+
+// Get user rentals
 app.get('/api/user/rentals', authenticateToken, async (req, res) => {
-    const userId = req.user.id;
+  const userId = req.user.id;
 
-    try {
-        console.log('Fetching rentals for user:', userId);
-        
-        const [rentals] = await pool.execute(`
-            SELECT r.*, b.title, b.author, b.description 
-            FROM rentals r 
-            JOIN books b ON r.book_id = b.id 
-            WHERE r.user_id = ? AND r.status = 'active'
-            ORDER BY r.rented_at DESC
-        `, [userId]);
+  try {
+    console.log('Fetching rentals for user:', userId);
+    
+    const [rentals] = await pool.execute(`
+        SELECT r.*, b.title, b.author, b.description 
+        FROM rentals r 
+        JOIN books b ON r.book_id = b.id 
+        WHERE r.user_id = ? AND r.status = 'active'
+        ORDER BY r.rented_at DESC
+    `, [userId]);
 
-        console.log('Found rentals:', rentals);
-        res.json(rentals);
-    } catch (error) {
-        console.error('Fetch rentals error:', error);
-        res.status(500).json({ error: 'Failed to fetch rentals: ' + error.message });
-    }
+    console.log('Found rentals:', rentals);
+    res.json(rentals);
+  } catch (error) {
+    console.error('Fetch rentals error:', error);
+    res.status(500).json({ error: 'Failed to fetch rentals: ' + error.message });
+  }
 });
 
-// Get user queue - ADD THIS ENDPOINT
+// Get user queue
 app.get('/api/user/queue', authenticateToken, async (req, res) => {
-    const userId = req.user.id;
+  const userId = req.user.id;
 
-    try {
-        console.log('Fetching queue for user:', userId);
-        
-        const [queue] = await pool.execute(`
-            SELECT q.*, b.title, b.author, b.description 
-            FROM queue q 
-            JOIN books b ON q.book_id = b.id 
-            WHERE q.user_id = ?
-            ORDER BY q.added_at DESC
-        `, [userId]);
+  try {
+    console.log('Fetching queue for user:', userId);
+    
+    const [queue] = await pool.execute(`
+        SELECT q.*, b.title, b.author, b.description 
+        FROM queue q 
+        JOIN books b ON q.book_id = b.id 
+        WHERE q.user_id = ?
+        ORDER BY q.added_at DESC
+    `, [userId]);
 
-        console.log('Found queue items:', queue);
-        res.json(queue);
-    } catch (error) {
-        console.error('Fetch queue error:', error);
-        res.status(500).json({ error: 'Failed to fetch queue: ' + error.message });
-    }
+    console.log('Found queue items:', queue);
+    res.json(queue);
+  } catch (error) {
+    console.error('Fetch queue error:', error);
+    res.status(500).json({ error: 'Failed to fetch queue: ' + error.message });
+  }
 });
 
-// Add to queue endpoint - ADD THIS ENDPOINT
+// Add to queue endpoint
+// Update the add to queue endpoint
 app.post('/api/queue/add', authenticateToken, async (req, res) => {
     const { bookId } = req.body;
     const userId = req.user.id;
 
     try {
+        // Check if book exists
+        const [books] = await pool.execute('SELECT * FROM books WHERE id = ?', [bookId]);
+        if (books.length === 0) {
+            return res.status(404).json({ error: 'Book not found' });
+        }
+
+        const book = books[0];
+        
+        // Get queue information to check if there are people waiting
+        const [queueItems] = await pool.execute(`
+            SELECT * FROM queue 
+            WHERE book_id = ? 
+            ORDER BY added_at ASC
+        `, [bookId]);
+
+        // Allow joining queue if:
+        // 1. Book is unavailable (available_copies <= 0), OR
+        // 2. Book is available but there are people in queue (meaning it's reserved for first person)
+        const canJoinQueue = book.available_copies <= 0 || queueItems.length > 0;
+
+        if (!canJoinQueue && book.available_copies > 0) {
+            return res.status(400).json({ 
+                error: 'Book is available for direct rental. No need to join queue.',
+                available: true 
+            });
+        }
+
         // Check if already in queue
         const [existingQueue] = await pool.execute(
             'SELECT * FROM queue WHERE book_id = ? AND user_id = ?',
@@ -379,90 +501,7 @@ app.post('/api/queue/add', authenticateToken, async (req, res) => {
             return res.status(400).json({ error: 'Book already in your queue' });
         }
 
-        // Add to queue
-        await pool.execute(
-            'INSERT INTO queue (book_id, user_id) VALUES (?, ?)',
-            [bookId, userId]
-        );
-
-        res.json({ success: true, message: 'Book added to queue' });
-    } catch (error) {
-        console.error('Add to queue error:', error);
-        res.status(500).json({ error: 'Failed to add to queue' });
-    }
-});
-
-// Remove from queue endpoint - ADD THIS ENDPOINT
-app.delete('/api/queue/remove', authenticateToken, async (req, res) => {
-    const { queueId } = req.body;
-    const userId = req.user.id;
-
-    try {
-        await pool.execute(
-            'DELETE FROM queue WHERE id = ? AND user_id = ?',
-            [queueId, userId]
-        );
-
-        res.json({ success: true, message: 'Removed from queue' });
-    } catch (error) {
-        console.error('Remove from queue error:', error);
-        res.status(500).json({ error: 'Failed to remove from queue' });
-    }
-});
-
-// Return book endpoint - ADD THIS ENDPOINT
-app.post('/api/books/return', authenticateToken, async (req, res) => {
-    const { rentalId, bookId } = req.body;
-    const userId = req.user.id;
-
-    try {
-        // Verify rental belongs to user
-        const [rentals] = await pool.execute(
-            'SELECT * FROM rentals WHERE id = ? AND user_id = ? AND status = "active"',
-            [rentalId, userId]
-        );
-
-        if (rentals.length === 0) {
-            return res.status(404).json({ error: 'Rental not found' });
-        }
-
-        // Update rental status
-        await pool.execute(
-            'UPDATE rentals SET status = "returned", returned_at = CURRENT_TIMESTAMP WHERE id = ?',
-            [rentalId]
-        );
-
-        // Update book availability
-        await pool.execute(
-            'UPDATE books SET available_copies = available_copies + 1 WHERE id = ?',
-            [bookId]
-        );
-
-        res.json({ success: true, message: 'Book returned successfully' });
-    } catch (error) {
-        console.error('Return book error:', error);
-        res.status(500).json({ error: 'Failed to return book' });
-    }
-});
-// Rent, return, queue endpoints (same as before)
-// Rent book endpoint - UPDATE THIS EXISTING ENDPOINT
-app.post('/api/books/rent', authenticateToken, async (req, res) => {
-    const { bookId } = req.body;
-    const userId = req.user.id;
-
-    console.log('Rent request - User:', userId, 'Book:', bookId);
-
-    try {
-        const [books] = await pool.execute('SELECT * FROM books WHERE id = ?', [bookId]);
-        if (books.length === 0) {
-            return res.status(404).json({ error: 'Book not found' });
-        }
-
-        const book = books[0];
-        if (book.available_copies <= 0) {
-            return res.status(400).json({ error: 'Book not available' });
-        }
-
+        // Check if user already has active rental
         const [existingRentals] = await pool.execute(
             'SELECT * FROM rentals WHERE book_id = ? AND user_id = ? AND status = "active"',
             [bookId, userId]
@@ -472,35 +511,277 @@ app.post('/api/books/rent', authenticateToken, async (req, res) => {
             return res.status(400).json({ error: 'You already have this book rented' });
         }
 
-        const dueDate = new Date();
-        dueDate.setDate(dueDate.getDate() + 21);
-
+        // Add to queue
         await pool.execute(
-            'INSERT INTO rentals (book_id, user_id, due_date) VALUES (?, ?, ?)',
-            [bookId, userId, dueDate]
+            'INSERT INTO queue (book_id, user_id) VALUES (?, ?)',
+            [bookId, userId]
         );
 
-        await pool.execute(
-            'UPDATE books SET available_copies = available_copies - 1 WHERE id = ?',
-            [bookId]
-        );
+        // Get updated queue position
+        const [updatedQueueItems] = await pool.execute(`
+            SELECT * FROM queue 
+            WHERE book_id = ? 
+            ORDER BY added_at ASC
+        `, [bookId]);
 
-        console.log('Rental created successfully for user:', userId, 'book:', bookId);
-        
-        res.json({
-            success: true,
-            message: 'Book rented successfully for 21 days',
-            dueDate: dueDate.toISOString()
+        const position = updatedQueueItems.findIndex(item => item.user_id === userId) + 1;
+
+        res.json({ 
+            success: true, 
+            message: 'Book added to queue',
+            position,
+            totalInQueue: updatedQueueItems.length,
+            availableCopies: book.available_copies
         });
     } catch (error) {
-        console.error('Rent book error:', error);
-        res.status(500).json({ error: 'Failed to rent book' });
+        console.error('Add to queue error:', error);
+        res.status(500).json({ error: 'Failed to add to queue' });
     }
+});
+// Remove from queue endpoint
+app.delete('/api/queue/remove', authenticateToken, async (req, res) => {
+  const { queueId } = req.body;
+  const userId = req.user.id;
+
+  try {
+    await pool.execute(
+      'DELETE FROM queue WHERE id = ? AND user_id = ?',
+      [queueId, userId]
+    );
+
+    res.json({ success: true, message: 'Removed from queue' });
+  } catch (error) {
+    console.error('Remove from queue error:', error);
+    res.status(500).json({ error: 'Failed to remove from queue' });
+  }
+});
+
+// Return book endpoint
+app.post('/api/books/return', authenticateToken, async (req, res) => {
+  const { rentalId, bookId } = req.body;
+  const userId = req.user.id;
+
+  try {
+    // Verify rental belongs to user
+    const [rentals] = await pool.execute(
+      'SELECT * FROM rentals WHERE id = ? AND user_id = ? AND status = "active"',
+      [rentalId, userId]
+    );
+
+    if (rentals.length === 0) {
+      return res.status(404).json({ error: 'Rental not found' });
+    }
+
+    // Update rental status
+    await pool.execute(
+      'UPDATE rentals SET status = "returned", returned_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [rentalId]
+    );
+
+    // Update book availability
+    await pool.execute(
+      'UPDATE books SET available_copies = available_copies + 1 WHERE id = ?',
+      [bookId]
+    );
+
+    // Process queue for this book
+    await processQueue(bookId);
+
+    res.json({ success: true, message: 'Book returned successfully' });
+  } catch (error) {
+    console.error('Return book error:', error);
+    res.status(500).json({ error: 'Failed to return book' });
+  }
+});
+
+// Rent book endpoint with queue priority
+app.post('/api/books/rent', authenticateToken, async (req, res) => {
+  const { bookId } = req.body;
+  const userId = req.user.id;
+
+  console.log('Rent request - User:', userId, 'Book:', bookId);
+
+  try {
+    const [books] = await pool.execute('SELECT * FROM books WHERE id = ?', [bookId]);
+    if (books.length === 0) {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+
+    const book = books[0];
+    
+    // Get queue information
+    const [queueItems] = await pool.execute(`
+        SELECT * FROM queue 
+        WHERE book_id = ? 
+        ORDER BY added_at ASC
+    `, [bookId]);
+
+    // Check if user is first in queue when book is available
+    if (book.available_copies > 0 && queueItems.length > 0) {
+      const firstInQueue = queueItems[0];
+      if (firstInQueue.user_id !== userId) {
+        return res.status(400).json({ 
+          error: 'Book is reserved for the first person in queue',
+          reserved: true,
+          available: false
+        });
+      }
+    }
+
+    // Check if book is available (either no queue or user is first)
+    const canRent = book.available_copies > 0 && 
+                   (queueItems.length === 0 || queueItems[0].user_id === userId);
+
+    if (!canRent) {
+      return res.status(400).json({ 
+        error: 'Book not available for rental',
+        available: false 
+      });
+    }
+
+    const [existingRentals] = await pool.execute(
+      'SELECT * FROM rentals WHERE book_id = ? AND user_id = ? AND status = "active"',
+      [bookId, userId]
+    );
+
+    if (existingRentals.length > 0) {
+      return res.status(400).json({ error: 'You already have this book rented' });
+    }
+
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 21);
+
+    await pool.execute(
+      'INSERT INTO rentals (book_id, user_id, due_date) VALUES (?, ?, ?)',
+      [bookId, userId, dueDate]
+    );
+
+    await pool.execute(
+      'UPDATE books SET available_copies = available_copies - 1 WHERE id = ?',
+      [bookId]
+    );
+
+    // Remove user from queue if they were in it
+    await pool.execute(
+      'DELETE FROM queue WHERE book_id = ? AND user_id = ?',
+      [bookId, userId]
+    );
+
+    console.log('Rental created successfully for user:', userId, 'book:', bookId);
+    
+    res.json({
+      success: true,
+      message: 'Book rented successfully for 21 days',
+      dueDate: dueDate.toISOString()
+    });
+  } catch (error) {
+    console.error('Rent book error:', error);
+    res.status(500).json({ error: 'Failed to rent book' });
+  }
+});
+
+// Get detailed queue information
+app.get('/api/books/:id/queue-details', authenticateToken, async (req, res) => {
+  const bookId = req.params.id;
+  const userId = req.user.id;
+
+  try {
+    const [queueItems] = await pool.execute(`
+        SELECT q.*, u.name, u.email 
+        FROM queue q 
+        JOIN users u ON q.user_id = u.id 
+        WHERE q.book_id = ? 
+        ORDER BY q.added_at ASC
+    `, [bookId]);
+
+    const userPosition = queueItems.findIndex(item => item.user_id === userId) + 1;
+    const userInQueue = queueItems.some(item => item.user_id === userId);
+    
+    // Calculate time remaining for each position
+    const queueWithTimeRemaining = queueItems.map((item, index) => {
+      const joinDate = new Date(item.added_at);
+      const expiryDate = new Date(joinDate.getTime() + (2 * 24 * 60 * 60 * 1000)); // 2 days
+      const now = new Date();
+      const timeRemaining = expiryDate - now;
+      
+      return {
+        ...item,
+        position: index + 1,
+        joinDate: item.added_at,
+        expiryDate: expiryDate.toISOString(),
+        timeRemaining: Math.max(0, timeRemaining),
+        isExpired: timeRemaining <= 0
+      };
+    });
+
+    res.json({
+      queue: queueWithTimeRemaining,
+      userPosition: userInQueue ? userPosition : null,
+      totalInQueue: queueItems.length,
+      userInQueue
+    });
+  } catch (error) {
+    console.error('Queue details error:', error);
+    res.status(500).json({ error: 'Failed to get queue details' });
+  }
+});
+
+// Queue cleanup endpoint (can be called manually or via cron)
+app.post('/api/queue/cleanup', async (req, res) => {
+  try {
+    const cleaned = await cleanupExpiredQueue();
+    res.json({ success: true, cleaned });
+  } catch (error) {
+    console.error('Queue cleanup error:', error);
+    res.status(500).json({ error: 'Failed to clean up queue' });
+  }
+});
+
+// Get queue info for specific book
+app.get('/api/books/:id/queue-info', authenticateToken, async (req, res) => {
+  const bookId = req.params.id;
+  const userId = req.user.id;
+
+  try {
+    // Get queue count and user position
+    const [queueItems] = await pool.execute(`
+        SELECT q.*, u.name 
+        FROM queue q 
+        JOIN users u ON q.user_id = u.id 
+        WHERE q.book_id = ? 
+        ORDER BY q.added_at ASC
+    `, [bookId]);
+
+    const userPosition = queueItems.findIndex(item => item.user_id === userId) + 1;
+    const totalInQueue = queueItems.length;
+
+    // Check if user is in queue
+    const [userInQueue] = await pool.execute(
+      'SELECT * FROM queue WHERE book_id = ? AND user_id = ?',
+      [bookId, userId]
+    );
+
+    res.json({
+      totalInQueue,
+      userPosition: userInQueue.length > 0 ? userPosition : null,
+      isInQueue: userInQueue.length > 0,
+      queueList: queueItems.slice(0, 5) // Return first 5 in queue
+    });
+  } catch (error) {
+    console.error('Queue info error:', error);
+    res.status(500).json({ error: 'Failed to get queue info' });
+  }
 });
 
 // Start server
 async function startServer() {
   await initializeDatabase();
+  
+  // Clean up expired queue entries on startup
+  await cleanupExpiredQueue();
+  
+  // Set up periodic queue cleanup (every hour)
+  setInterval(cleanupExpiredQueue, 60 * 60 * 1000);
   
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT} ✅`);

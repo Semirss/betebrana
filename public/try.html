@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeteBrana - Digital Library</title>
+    <!-- Element UI CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        /* General body styling with a subtle pattern to resemble a surface */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #dcdcdc;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"><rect width="10" height="10" fill="%23dcdcdc"/><path d="M-1,1l2,-2m0,4l2,-2m0,4l2,-2" stroke="%23c0c0c0" stroke-width="1"/></svg>');
+            font-family: 'Georgia', serif;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* The main book container */
+        .book {
+            width: 800px;
+            height: 500px;
+            display: flex;
+            background-color: #8B4513;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: perspective(2000px); 
+            padding: 5px;
+            transition: all 0.3s ease;
+        }
+
+        /* The container for the white pages */
+        .pages-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            background-color: #fff;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        /* Styles for each page */
+        .page {
+            width: 50%;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+            overflow: hidden;
+        }
+        
+        /* Left page specific styles */
+        .left-page {
+            border-right: 2px solid #ddd;
+            box-shadow: inset 5px 0 10px rgba(0, 0, 0, 0.1);
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+            transform-origin: right;
+            transform: rotateY(15deg);
+            z-index: 2;
+        }
+
+        /* Right page specific styles */
+        .right-page {
+            border-left: 2px solid #ddd;
+            box-shadow: inset -5px 0 10px rgba(0, 0, 0, 0.1);
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+            transform-origin: left;
+            transform: rotateY(-15deg);
+            z-index: 1;
+        }
+
+        /* The bookmark styling */
+        .bookmark {
+            position: absolute;
+            top: 0;
+            right: 20px;
+            width: 20px;
+            height: 60px;
+            background-color: #8B4513;
+            z-index: 10;
+            clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%);
+        }
+        
+        /* Page curl effect */
+        .left-page .page-curl {
+            position: absolute;
+            top: 0;
+            right: -10px;
+            width: 10px;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent);
+            z-index: 1;
+        }
+
+        .right-page .page-curl {
+            position: absolute;
+            top: 0;
+            left: -10px;
+            width: 10px;
+            height: 100%;
+            background: linear-gradient(to left, rgba(0, 0, 0, 0.1), transparent);
+            z-index: 1;
+        }
+        
+        /* Reader Styles */
+        .reader-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .reader-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: #f5f7fa;
+            border-bottom: 1px solid #e4e7ed;
+            transition: all 0.3s ease;
+        }
+        
+        .reader-content {
+            flex: 1;
+            position: relative;
+            overflow: auto;
+            transition: all 0.3s ease;
+        }
+        
+        /* EPUB Reader */
+        #epub-container {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* PDF Reader */
+        #pdf-container {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            transition: background 0.3s ease;
+        }
+        
+        .pdf-page {
+            margin: 10px auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        /* DOCX/DOC Content */
+        .docx-content {
+            max-width: 100%;
+            line-height: 1.6;
+            background: white;
+            min-height: 100%;
+            transition: all 0.3s ease;
+            padding: 20px;
+        }
+        
+        .docx-content h1 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e4e7ed;
+            padding-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .docx-content h2 {
+            font-size: 1.4em;
+            margin: 20px 0 12px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .docx-content p {
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .docx-content table {
+            border-collapse: collapse;
+            margin: 15px 0;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .docx-content table, .docx-content th, .docx-content td {
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+        }
+        
+        .docx-content th, .docx-content td {
+            padding: 6px 10px;
+            text-align: left;
+            transition: all 0.3s ease;
+        }
+        
+        .docx-content ul, .docx-content ol {
+            margin: 12px 0;
+            padding-left: 25px;
+        }
+        
+        /* TXT Content */
+        .txt-content {
+            max-width: 100%;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            font-family: inherit;
+            background: white;
+            min-height: 100%;
+            transition: all 0.3s ease;
+            padding: 20px;
+        }
+        
+        .book-title {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 16px;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .error-message {
+            color: #f56c6c;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .reader-footer {
+            padding: 10px 15px;
+            background: #f5f7fa;
+            border-top: 1px solid #e4e7ed;
+        }
+        
+        /* Library Styles */
+        .library-container {
+            padding: 20px;
+            height: 100%;
+            overflow: auto;
+            transition: all 0.3s ease;
+        }
+        
+        .library-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .book-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .book-item {
+            border: 1px solid #e4e7ed;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            position: relative;
+        }
+        
+        .book-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .book-cover {
+            width: 100%;
+            height: 100px;
+            background: #f5f7fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+            transition: all 0.3s ease;
+        }
+        
+        .book-info h3 {
+            margin-bottom: 5px;
+            font-size: 14px;
+            word-break: break-word;
+        }
+        
+        .book-info p {
+            color: #909399;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .file-type {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #409eff;
+            color: white;
+            border-radius: 10px;
+            font-size: 10px;
+        }
+        
+        .book-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .book-item:hover .book-actions {
+            opacity: 1;
+        }
+        
+        .empty-library {
+            text-align: center;
+            padding: 60px 20px;
+            color: #909399;
+        }
+        
+        .empty-library h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .empty-library p {
+            margin-bottom: 20px;
+        }
+        
+        /* Login Form Styles */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            background: #f5f7fa;
+        }
+        
+        .login-form {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+        
+        .login-title {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+            color: #333;
+        }
+        
+        .login-error {
+            color: #f56c6c;
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fef0f0;
+            border-radius: 4px;
+        }
+        
+        /* Dashboard Styles */
+        .dashboard-section {
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e4e7ed;
+            padding-bottom: 10px;
+        }
+        
+        .dashboard-subtitle {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #409eff;
+        }
+        
+        .rental-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .rental-status {
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        
+        .status-active {
+            background-color: #e6f7e6;
+            color: #2e7d32;
+        }
+        
+        .status-due {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .status-overdue {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e4e7ed;
+        }
+        
+        .nav-tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab.active {
+            border-bottom-color: #409eff;
+            color: #409eff;
+        }
+        
+        .nav-tab:hover {
+            color: #409eff;
+        }
+        
+        /* THEME STYLES */
+        
+        /* Light Theme (Default) */
+        .theme-light {
+            background: #ffffff;
+            color: #333333;
+        }
+        
+        .theme-light .reader-header {
+            background: #f5f7fa;
+            color: #333333;
+            border-bottom-color: #e4e7ed;
+        }
+        
+        .theme-light .reader-footer {
+            background: #f5f7fa;
+            color: #333333;
+            border-top-color: #e4e7ed;
+        }
+        
+        .theme-light .docx-content,
+        .theme-light .txt-content {
+            background: #ffffff;
+            color: #333333;
+        }
+        
+        .theme-light .docx-content h1,
+        .theme-light .docx-content h2 {
+            color: #333333;
+            border-bottom-color: #e4e7ed;
+        }
+        
+        .theme-light #pdf-container {
+            background: #525659;
+        }
+        
+        /* Dark Theme */
+        .theme-dark {
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        
+        .theme-dark .reader-header {
+            background: #2d2d2d;
+            color: #e0e0e0;
+            border-bottom-color: #404040;
+        }
+        
+        .theme-dark .reader-footer {
+            background: #2d2d2d;
+            color: #e0e0e0;
+            border-top-color: #404040;
+        }
+        
+        .theme-dark .docx-content,
+        .theme-dark .txt-content {
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        
+        .theme-dark .docx-content h1,
+        .theme-dark .docx-content h2 {
+            color: #e0e0e0;
+            border-bottom-color: #404040;
+        }
+        
+        .theme-dark .docx-content table,
+        .theme-dark .docx-content th,
+        .theme-dark .docx-content td {
+            border-color: #404040;
+        }
+        
+        .theme-dark #pdf-container {
+            background: #2d2d2d;
+        }
+        
+        /* Tan Theme */
+        .theme-tan {
+            background: #fdf6e3;
+            color: #657b83;
+        }
+        
+        .theme-tan .reader-header {
+            background: #eee8d5;
+            color: #657b83;
+            border-bottom-color: #d5c9a7;
+        }
+        
+        .theme-tan .reader-footer {
+            background: #eee8d5;
+            color: #657b83;
+            border-top-color: #d5c9a7;
+        }
+        
+        .theme-tan .docx-content,
+        .theme-tan .txt-content {
+            background: #fdf6e3;
+            color: #657b83;
+        }
+        
+        .theme-tan .docx-content h1,
+        .theme-tan .docx-content h2 {
+            color: #586e75;
+            border-bottom-color: #d5c9a7;
+        }
+        
+        .theme-tan #pdf-container {
+            background: #f0e8d5;
+        }
+        
+        /* Blue Theme */
+        .theme-blue {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .theme-blue .reader-header {
+            background: #bbdefb;
+            color: #0d47a1;
+            border-bottom-color: #90caf9;
+        }
+        
+        .theme-blue .reader-footer {
+            background: #bbdefb;
+            color: #0d47a1;
+            border-top-color: #90caf9;
+        }
+        
+        .theme-blue .docx-content,
+        .theme-blue .txt-content {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .theme-blue .docx-content h1,
+        .theme-blue .docx-content h2 {
+            color: #0d47a1;
+            border-bottom-color: #90caf9;
+        }
+        
+        .theme-blue .docx-content table,
+        .theme-blue .docx-content th,
+        .theme-blue .docx-content td {
+            border-color: #90caf9;
+        }
+        
+        .theme-blue #pdf-container {
+            background: #bbdefb;
+        }
+        
+        /* Green Theme */
+        .theme-green {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .theme-green .reader-header {
+            background: #c8e6c9;
+            color: #1b5e20;
+            border-bottom-color: #a5d6a7;
+        }
+        
+        .theme-green .reader-footer {
+            background: #c8e6c9;
+            color: #1b5e20;
+            border-top-color: #a5d6a7;
+        }
+        
+        .theme-green .docx-content,
+        .theme-green .txt-content {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .theme-green .docx-content h1,
+        .theme-green .docx-content h2 {
+            color: #1b5e20;
+            border-bottom-color: #a5d6a7;
+        }
+        
+        .theme-green .docx-content table,
+        .theme-green .docx-content th,
+        .theme-green .docx-content td {
+            border-color: #a5d6a7;
+        }
+        
+        .theme-green #pdf-container {
+            background: #c8e6c9;
+        }
+        
+        /* Library Theme Adaptations */
+        .theme-dark .library-container {
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        
+        .theme-dark .book-item {
+            background: #2d2d2d;
+            border-color: #404040;
+            color: #e0e0e0;
+        }
+        
+        .theme-dark .book-cover {
+            background: #404040;
+        }
+        
+        .theme-dark .book-info p {
+            color: #b0b0b0;
+        }
+        
+        .theme-tan .library-container {
+            background: #fdf6e3;
+            color: #657b83;
+        }
+        
+        .theme-blue .library-container {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .theme-green .library-container {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .theme-selector {
+            margin: 10px 0;
+        }
+        
+        .theme-preview {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+            border: 2px solid transparent;
+        }
+        
+        .theme-light .theme-preview { background: linear-gradient(45deg, #ffffff 50%, #333333 50%); }
+        .theme-dark .theme-preview { background: linear-gradient(45deg, #2d2d2d 50%, #e0e0e0 50%); }
+        .theme-tan .theme-preview { background: linear-gradient(45deg, #eee8d5 50%, #657b83 50%); }
+        .theme-blue .theme-preview { background: linear-gradient(45deg, #bbdefb 50%, #1565c0 50%); }
+        .theme-green .theme-preview { background: linear-gradient(45deg, #c8e6c9 50%, #2e7d32 50%); }
+
+        /* Book Open Animation */
+        .book-open {
+            width: 95vw;
+            height: 95vh;
+            padding: 0;
+            border-radius: 0;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
+        }
+        
+        .book-open .pages-container {
+            border-radius: 0;
+        }
+        
+        .book-open .left-page {
+            transform: rotateY(0deg);
+            width: 100%;
+        }
+        
+        .book-open .right-page {
+            transform: rotateY(0deg);
+            width: 0%;
+            display: none;
+        }
+        
+        .book-open .page-curl {
+            display: none;
+        }
+        
+        /* Search Dialog */
+        .search-dialog {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 500px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 100;
+            padding: 15px;
+        }
+        
+        .search-results {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .search-result {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            line-height: 1.4;
+        }
+        
+        .search-result:hover {
+            background: #f5f7fa;
+        }
+        
+        /* Settings Dialog */
+        .settings-dialog {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            width: 300px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 100;
+            padding: 15px;
+        }
+        
+        /* Book Content Styles */
+        .book-content {
+            height: 100%;
+            overflow-y: auto;
+            padding: 15px;
+            line-height: 1.6;
+        }
+        
+        .book-content h1 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+        }
+        
+        .book-content h2 {
+            font-size: 1.4em;
+            margin: 20px 0 10px 0;
+        }
+        
+        .book-content p {
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        
+        .book-content .chapter {
+            page-break-after: always;
+        }
+        
+        /* Page Numbers */
+        .page-number {
+            position: absolute;
+            bottom: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .left-page .page-number {
+            right: 15px;
+        }
+        
+        .right-page .page-number {
+            left: 15px;
+        }
+        
+        /* Responsive design for smaller screens */
+        @media (max-width: 900px) {
+            .book {
+                width: 95%;
+                height: 80vh;
+            }
+            
+            .page {
+                padding: 15px;
+            }
+            
+            .reader-header {
+                padding: 8px 12px;
+            }
+            
+            .book-list {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                background-color: #fff;
+                padding: 10px;
+            }
+
+            .book {
+                width: 100%;
+                height: 80vh;
+                flex-direction: column;
+                box-shadow: none;
+                border-radius: 0;
+                padding: 0;
+                transform: none;
+            }
+            
+            .pages-container {
+                flex-direction: column;
+            }
+
+            .page {
+                width: 100%;
+                border: none;
+                box-shadow: none;
+                border-radius: 0;
+                padding: 15px;
+                transform: none;
+            }
+
+            .left-page, .right-page {
+                border: none;
+            }
+
+            .left-page {
+                border-bottom: 2px solid #ddd;
+            }
+
+            .bookmark {
+                right: 20px;
+                height: 40px;
+                width: 30px;
+            }
+
+            .page-curl {
+                display: none;
+            }
+            
+            .reader-header {
+                flex-wrap: wrap;
+            }
+            
+            .book-title {
+                order: 1;
+                width: 100%;
+                text-align: center;
+                margin: 5px 0;
+            }
+            
+            .control-group {
+                order: 2;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .search-dialog, .settings-dialog {
+                width: 90%;
+                left: 5%;
+                right: 5%;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Book Container -->
+        <div class="book" :class="{ 'book-open': currentBook }">
+            <div class="pages-container">
+                <!-- Left Page: Content Area -->
+                <div class="left-page page">
+                    <div class="page-curl"></div>
+                    <div class="book-content">
+                        <!-- Login View -->
+                        <div v-if="!isAuthenticated" class="login-container" :class="`theme-${theme}`">
+                            <div class="login-form">
+                                <h2 class="login-title">BeteBrana Reader</h2>
+                                <div v-if="loginError" class="login-error">{{ loginError }}</div>
+                                <el-form :model="loginForm" :rules="loginRules" ref="loginForm">
+                                    <el-form-item prop="email">
+                                        <el-input v-model="loginForm.email" placeholder="Email" prefix-icon="el-icon-user"></el-input>
+                                    </el-form-item>
+                                    <el-form-item prop="password">
+                                        <el-input v-model="loginForm.password" type="password" placeholder="Password" prefix-icon="el-icon-lock" show-password></el-input>
+                                    </el-form-item>
+                                    <el-form-item>
+                                        <el-button type="primary" style="width: 100%" :loading="loginLoading" @click="handleLogin">Login</el-button>
+                                    </el-form-item>
+                                    <el-form-item>
+                                        <el-button style="width: 100%" @click="showRegister = true">Register</el-button>
+                                    </el-form-item>
+                                </el-form>
+                            </div>
+                        </div>
+
+                        <!-- Library View -->
+                        <div v-else-if="isAuthenticated && currentView === 'library'" class="library-container" :class="`theme-${theme}`">
+                            <div class="library-header">
+                                <h1>Document Library</h1>
+                                <div class="control-group">
+                                    <el-button icon="el-icon-s-operation" circle @click="showSettings"></el-button>
+                                    <el-button icon="el-icon-user" circle @click="showDashboard"></el-button>
+                                    <el-button icon="el-icon-switch-button" circle @click="logout"></el-button>
+                                </div>
+                            </div>
+                            
+                            <div class="nav-tabs">
+                                <div class="nav-tab" :class="{ active: currentTab === 'all' }" @click="currentTab = 'all'">All Books</div>
+                                <div class="nav-tab" :class="{ active: currentTab === 'available' }" @click="currentTab = 'available'">Available</div>
+                            </div>
+                            
+                            <div v-if="filteredBooks.length === 0" class="empty-library">
+                                <h3>No documents available</h3>
+                                <p>Books will appear here once they're added to the system.</p>
+                            </div>
+                            
+                            <div v-else class="book-list">
+                                <div v-for="book in filteredBooks" :key="book.id" class="book-item" @click="openBook(book)">
+                                    <div class="book-cover">
+                                        <span v-if="book.file_type === 'pdf'">📄</span>
+                                        <span v-else-if="book.file_type === 'docx' || book.file_type === 'doc'">📝</span>
+                                        <span v-else-if="book.file_type === 'txt'">📃</span>
+                                        <span v-else>📁</span>
+                                    </div>
+                                    <div class="book-info">
+                                        <h3>{{ book.title }}</h3>
+                                        <p>{{ book.author || 'Unknown Author' }}</p>
+                                        <p>Available: {{ book.available_copies }}/{{ book.total_copies }}</p>
+                                        <span class="file-type">{{ book.file_type ? book.file_type.toUpperCase() : 'UNKNOWN' }}</span>
+                                    </div>
+                                    <div class="book-actions">
+                                        <el-button size="mini" icon="el-icon-plus" circle 
+                                                @click.stop="rentBook(book)" 
+                                                :disabled="book.available_copies <= 0"
+                                                v-if="!hasRentedBook(book.id)"></el-button>
+                                        <el-button size="mini" icon="el-icon-star-off" circle 
+                                                @click.stop="addToQueue(book)"
+                                                v-if="!hasQueuedBook(book.id)"></el-button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dashboard View -->
+                        <div v-else-if="isAuthenticated && currentView === 'dashboard'" class="library-container" :class="`theme-${theme}`">
+                            <div class="library-header">
+                                <h1>Your Dashboard</h1>
+                                <div class="control-group">
+                                    <el-button icon="el-icon-s-operation" circle @click="showSettings"></el-button>
+                                    <el-button icon="el-icon-s-grid" circle @click="showLibrary"></el-button>
+                                    <el-button icon="el-icon-switch-button" circle @click="logout"></el-button>
+                                </div>
+                            </div>
+                            
+                            <div class="nav-tabs">
+                                <div class="nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">Rented Books</div>
+                                <div class="nav-tab" :class="{ active: currentTab === 'queue' }" @click="currentTab = 'queue'">Your Queue</div>
+                            </div>
+                            
+                            <!-- Currently Rented Books -->
+                            <div v-if="currentTab === 'rentals'" class="dashboard-section">
+                                <h3 class="dashboard-subtitle">Currently Rented Books</h3>
+                                <div v-if="userRentals.length === 0" class="empty-library">
+                                    <p>You have no rented books</p>
+                                </div>
+                                <div v-else class="book-list">
+                                    <div v-for="rental in userRentals" :key="rental.id" class="book-item">
+                                        <div class="book-cover">
+                                            <span v-if="getBookFileType(rental.book_id) === 'pdf'">📄</span>
+                                            <span v-else-if="getBookFileType(rental.book_id) === 'docx' || getBookFileType(rental.book_id) === 'doc'">📝</span>
+                                            <span v-else-if="getBookFileType(rental.book_id) === 'txt'">📃</span>
+                                            <span v-else>📁</span>
+                                        </div>
+                                        <div class="book-info">
+                                            <h3>{{ rental.title }}</h3>
+                                            <p>{{ rental.author || 'Unknown Author' }}</p>
+                                            <div class="rental-status" :class="getRentalStatusClass(rental)">
+                                                {{ getRentalStatusText(rental) }}
+                                            </div>
+                                            <p>Due: {{ formatDate(rental.due_date) }}</p>
+                                        </div>
+                                        <div class="rental-actions">
+                                            <el-button type="primary" size="small" @click="openRentedBook(rental)">Read</el-button>
+                                            <el-button type="warning" size="small" @click="returnBook(rental)">Return</el-button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Your Queue -->
+                            <div v-if="currentTab === 'queue'" class="dashboard-section">
+                                <h3 class="dashboard-subtitle">Your Queue</h3>
+                                <div v-if="userQueue.length === 0" class="empty-library">
+                                    <p>Your queue is empty</p>
+                                </div>
+                                <div v-else class="book-list">
+                                    <div v-for="item in userQueue" :key="item.id" class="book-item">
+                                        <div class="book-cover">
+                                            <span v-if="getBookFileType(item.book_id) === 'pdf'">📄</span>
+                                            <span v-else-if="getBookFileType(item.book_id) === 'docx' || getBookFileType(item.book_id) === 'doc'">📝</span>
+                                            <span v-else-if="getBookFileType(item.book_id) === 'txt'">📃</span>
+                                            <span v-else>📁</span>
+                                        </div>
+                                        <div class="book-info">
+                                            <h3>{{ item.title }}</h3>
+                                            <p>{{ item.author || 'Unknown Author' }}</p>
+                                            <p>Added: {{ formatDate(item.added_at) }}</p>
+                                            <span class="file-type">{{ getBookFileType(item.book_id) ? getBookFileType(item.book_id).toUpperCase() : 'UNKNOWN' }}</span>
+                                        </div>
+                                        <div class="rental-actions">
+                                            <el-button type="primary" size="small" 
+                                                    @click="rentBookFromQueue(item)"
+                                                    :disabled="!isBookAvailable(item.book_id)">Rent Now</el-button>
+                                            <el-button type="danger" size="small" @click="removeFromQueue(item)">Remove</el-button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reader View - Full screen when book is opened -->
+                        <div v-else-if="isAuthenticated && currentBook" class="reader-container" :class="`theme-${theme}`">
+                            <!-- Header -->
+                            <div class="reader-header">
+                                <div class="control-group">
+                                    <el-button icon="el-icon-back" circle @click="goBack"></el-button>
+                                    <el-button icon="el-icon-s-grid" circle @click="showLibrary"></el-button>
+                                    <el-button v-if="currentBook.type === 'epub'" icon="el-icon-arrow-left" circle @click="prevPage"></el-button>
+                                    <el-button v-if="currentBook.type === 'epub'" icon="el-icon-arrow-right" circle @click="nextPage"></el-button>
+                                </div>
+                                
+                                <div class="book-title">{{ currentBook.title }}</div>
+                                
+                                <div class="control-group">
+                                    <el-button icon="el-icon-zoom-out" circle @click="zoomOut"></el-button>
+                                    <el-button icon="el-icon-zoom-in" circle @click="zoomIn"></el-button>
+                                    <el-button icon="el-icon-search" circle @click="toggleSearch"></el-button>
+                                    <el-button icon="el-icon-s-operation" circle @click="showSettings"></el-button>
+                                    <el-button icon="el-icon-switch-button" circle @click="logout"></el-button>
+                                </div>
+                            </div>
+                            
+                            <!-- Reader Content - This is where the actual book content appears -->
+                            <div class="reader-content">
+                                <!-- Loading State -->
+                                <div v-if="!isReady" class="loading">
+                                    <el-button type="text" :loading="true">Loading {{ currentBook.type.toUpperCase() }}...</el-button>
+                                    <div v-if="loadError" class="error-message">
+                                        {{ loadError }}
+                                    </div>
+                                </div>
+                                
+                                <!-- EPUB Reader -->
+                                <div v-else-if="currentBook.type === 'epub'" id="epub-container"></div>
+                                
+                                <!-- PDF Reader -->
+                                <div v-else-if="currentBook.type === 'pdf'" id="pdf-container">
+                                    <canvas v-for="page in pdfPages" :key="page.pageNumber" :id="`pdf-page-${page.pageNumber}`" class="pdf-page"></canvas>
+                                </div>
+                                
+                                <!-- DOCX/DOC Reader -->
+                                <div v-else-if="currentBook.type === 'docx' || currentBook.type === 'doc'" class="docx-content" v-html="docxContent"></div>
+                                
+                                <!-- TXT Reader -->
+                                <div v-else-if="currentBook.type === 'txt'" class="txt-content">{{ txtContent }}</div>
+                                
+                                <!-- Unsupported Format -->
+                                <div v-else class="loading">
+                                    Unsupported file format: {{ currentBook.type }}
+                                </div>
+                            </div>
+                            
+                            <!-- Footer -->
+                            <div class="reader-footer" v-if="currentBook.type === 'epub' || currentBook.type === 'pdf'">
+                                <el-slider 
+                                    v-model="progress" 
+                                    :format-tooltip="formatProgress" 
+                                    @change="onProgressChange"
+                                    style="width: 100%">
+                                </el-slider>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-number">{{ currentPage }}/{{ totalPages }}</div>
+                </div>
+                
+                <!-- Right Page: Welcome/Info Area (Hidden when reading) -->
+                <div class="right-page page" v-if="!currentBook">
+                    <div class="page-curl"></div>
+                    <div class="bookmark"></div>
+                    <div class="book-content">
+                        <!-- Welcome content when not reading -->
+                        <div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                            <h1 style="font-size: 2.5em; margin-bottom: 20px; color: #8B4513;">BeteBrana</h1>
+                            <h2 style="font-size: 1.5em; margin-bottom: 30px;">Digital Library</h2>
+                            <p style="font-size: 1.1em; line-height: 1.6; max-width: 400px;">
+                                Welcome to BeteBrana, your gateway to a world of knowledge. 
+                                Access thousands of books, documents, and resources in various formats.
+                            </p>
+                            <div v-if="isAuthenticated" style="display: flex; gap: 15px; margin-top: 30px;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 2em;">📚</div>
+                                    <div style="font-size: 0.9em;">{{ bookList.length }} Titles</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 2em;">⏳</div>
+                                    <div style="font-size: 0.9em;">{{ userQueue.length }} In Queue</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 2em;">📖</div>
+                                    <div style="font-size: 0.9em;">{{ userRentals.length }} Rented</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-number">{{ currentPage + 1 }}/{{ totalPages }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Dialog -->
+        <el-dialog title="Register" :visible.sync="showRegister" width="400px">
+            <el-form :model="registerForm" :rules="registerRules" ref="registerForm">
+                <el-form-item label="Name" prop="name">
+                    <el-input v-model="registerForm.name"></el-input>
+                </el-form-item>
+                <el-form-item label="Email" prop="email">
+                    <el-input v-model="registerForm.email"></el-input>
+                </el-form-item>
+                <el-form-item label="Password" prop="password">
+                    <el-input v-model="registerForm.password" type="password" show-password></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer">
+                <el-button @click="showRegister = false">Cancel</el-button>
+                <el-button type="primary" :loading="registerLoading" @click="handleRegister">Register</el-button>
+            </div>
+        </el-dialog>
+        
+        <!-- Search Dialog -->
+        <el-dialog title="Search" :visible.sync="searchVisible" width="500px" :class="`theme-${theme}`">
+            <el-input v-model="searchText" placeholder="Enter search term" @input="onSearch"></el-input>
+            <div class="search-results" style="max-height: 300px; overflow-y: auto; margin-top: 15px;">
+                <div v-if="searchResults.length === 0 && searchText" style="text-align: center; color: #909399; padding: 20px;">
+                    No results found for "{{ searchText }}"
+                </div>
+                <div v-for="result in searchResults" :key="result.index" class="search-result" 
+                     @click="goToSearchResult(result)" style="padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; line-height: 1.4;">
+                    <div style="font-size: 12px; color: #409eff; margin-bottom: 4px;">
+                        Result {{ result.index + 1 }}
+                    </div>
+                    {{ result.text }}
+                </div>
+            </div>
+        </el-dialog>
+        
+        <!-- Settings Dialog -->
+        <el-dialog title="Reading Settings" :visible.sync="settingsVisible" width="400px" :class="`theme-${theme}`">
+            <el-form label-width="100px">
+                <el-form-item label="Theme">
+                    <el-radio-group v-model="theme" @change="applyTheme" class="theme-selector">
+                        <el-radio label="light">
+                            <span class="theme-preview"></span>
+                            Light
+                        </el-radio>
+                        <el-radio label="dark">
+                            <span class="theme-preview"></span>
+                            Dark
+                        </el-radio>
+                        <el-radio label="tan">
+                            <span class="theme-preview"></span>
+                            Tan
+                        </el-radio>
+                        <el-radio label="blue">
+                            <span class="theme-preview"></span>
+                            Blue
+                        </el-radio>
+                        <el-radio label="green">
+                            <span class="theme-preview"></span>
+                            Green
+                        </el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                
+                <el-form-item label="Font Size">
+                    <el-input-number v-model="fontSize" :min="12" :max="24" :step="2"></el-input-number>
+                </el-form-item>
+                
+                <el-form-item label="Zoom Level">
+                    <el-input-number v-model="zoomLevel" :min="0.5" :max="3" :step="0.1" :precision="1"></el-input-number>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+    </div>
+
+    <!-- Libraries -->
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/epubjs/dist/epub.min.js"></script>
+    <script src="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js"></script>
+    <script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
+    
+    <script>
+        // Set PDF.js worker path
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
+
+        // API Configuration
+        const API_BASE = 'http://localhost:3000/api';
+
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    // Authentication
+                    isAuthenticated: false,
+                    token: null,
+                    user: null,
+                    loginForm: {
+                        email: '',
+                        password: ''
+                    },
+                    loginRules: {
+                        email: [
+                            { required: true, message: 'Please enter email', trigger: 'blur' },
+                            { type: 'email', message: 'Please enter a valid email', trigger: 'blur' }
+                        ],
+                        password: [
+                            { required: true, message: 'Please enter password', trigger: 'blur' }
+                        ]
+                    },
+                    registerForm: {
+                        name: '',
+                        email: '',
+                        password: ''
+                    },
+                    registerRules: {
+                        name: [
+                            { required: true, message: 'Please enter name', trigger: 'blur' }
+                        ],
+                        email: [
+                            { required: true, message: 'Please enter email', trigger: 'blur' },
+                            { type: 'email', message: 'Please enter a valid email', trigger: 'blur' }
+                        ],
+                        password: [
+                            { required: true, message: 'Please enter password', trigger: 'blur' },
+                            { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' }
+                        ]
+                    },
+                    showRegister: false,
+                    loginLoading: false,
+                    registerLoading: false,
+                    loginError: '',
+                    
+                    // Navigation
+                    currentView: 'library',
+                    currentTab: 'all',
+                    
+                    // Reader state
+                    currentBook: null,
+                    bookList: [],
+                    userRentals: [],
+                    userQueue: [],
+                    isReady: false,
+                    loadError: null,
+                    progress: 0,
+                    searchVisible: false,
+                    searchText: '',
+                    searchResults: [],
+                    settingsVisible: false,
+                    theme: 'light',
+                    fontSize: 16,
+                    zoomLevel: 1.0,
+                    
+                    // EPUB
+                    rendition: null,
+                    book: null,
+                    
+                    // PDF
+                    pdfDoc: null,
+                    pdfPages: [],
+                    
+                    // DOCX/DOC
+                    docxContent: '',
+                    
+                    // TXT
+                    txtContent: '',
+                    
+                    // Book content management
+                    currentPage: 1,
+                    totalPages: 1
+                };
+            },
+            
+            computed: {
+                filteredBooks() {
+                    if (this.currentTab === 'available') {
+                        return this.bookList.filter(book => book.available_copies > 0);
+                    }
+                    return this.bookList;
+                }
+            },
+            
+            async mounted() {
+                // Check for existing authentication
+                const token = localStorage.getItem('reader-token');
+                const user = localStorage.getItem('reader-user');
+                
+                if (token && user) {
+                    this.token = token;
+                    this.user = JSON.parse(user);
+                    this.isAuthenticated = true;
+                    
+                    // Load saved theme from localStorage
+                    const savedTheme = localStorage.getItem('reader-theme');
+                    if (savedTheme) {
+                        this.theme = savedTheme;
+                    }
+                    
+                    await this.loadLibrary();
+                    await this.loadUserData();
+                    this.applyTheme();
+                }
+            },
+            
+            methods: {
+                // API Helper
+                async apiCall(endpoint, options = {}) {
+                    const url = `${API_BASE}${endpoint}`;
+                    const config = {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...options.headers
+                        },
+                        ...options
+                    };
+
+                    if (this.token) {
+                        config.headers.Authorization = `Bearer ${this.token}`;
+                    }
+
+                    if (options.body) {
+                        config.body = JSON.stringify(options.body);
+                    }
+
+                    try {
+                        const response = await fetch(url, config);
+                        const data = await response.json();
+                        
+                        if (!response.ok) {
+                            throw new Error(data.error || 'Request failed');
+                        }
+                        
+                        return data;
+                    } catch (error) {
+                        console.error('API call error:', error);
+                        throw error;
+                    }
+                },
+                
+                // Authentication
+                async handleLogin() {
+                    this.$refs.loginForm.validate(async (valid) => {
+                        if (!valid) return;
+                        
+                        this.loginLoading = true;
+                        this.loginError = '';
+                        
+                        try {
+                            const result = await this.apiCall('/auth/login', {
+                                method: 'POST',
+                                body: this.loginForm
+                            });
+                            
+                            this.token = result.token;
+                            this.user = result.user;
+                            this.isAuthenticated = true;
+                            
+                            // Store in localStorage
+                            localStorage.setItem('reader-token', this.token);
+                            localStorage.setItem('reader-user', JSON.stringify(this.user));
+                            
+                            // Clear form
+                            this.loginForm.email = '';
+                            this.loginForm.password = '';
+                            
+                            // Load library and user data
+                            await this.loadLibrary();
+                            await this.loadUserData();
+                            
+                            this.$message.success('Login successful!');
+                            
+                        } catch (error) {
+                            this.loginError = error.message;
+                        } finally {
+                            this.loginLoading = false;
+                        }
+                    });
+                },
+                
+                async handleRegister() {
+                    this.$refs.registerForm.validate(async (valid) => {
+                        if (!valid) return;
+                        
+                        this.registerLoading = true;
+                        
+                        try {
+                            const result = await this.apiCall('/auth/register', {
+                                method: 'POST',
+                                body: this.registerForm
+                            });
+                            
+                            this.showRegister = false;
+                            this.registerForm.name = '';
+                            this.registerForm.email = '';
+                            this.registerForm.password = '';
+                            
+                            this.$message.success('Registration successful! Please login.');
+                            
+                        } catch (error) {
+                            this.$message.error('Registration failed: ' + error.message);
+                        } finally {
+                            this.registerLoading = false;
+                        }
+                    });
+                },
+                
+                logout() {
+                    this.token = null;
+                    this.user = null;
+                    this.isAuthenticated = false;
+                    this.currentBook = null;
+                    this.bookList = [];
+                    this.userRentals = [];
+                    this.userQueue = [];
+                    
+                    localStorage.removeItem('reader-token');
+                    localStorage.removeItem('reader-user');
+                    
+                    this.$message.success('Logged out successfully');
+                },
+                
+                // Navigation
+                showLibrary() {
+                    this.currentView = 'library';
+                    this.currentBook = null;
+                },
+                
+                showDashboard() {
+                    this.currentView = 'dashboard';
+                    this.currentTab = 'rentals';
+                },
+                
+                // Data Loading
+                async loadLibrary() {
+                    try {
+                        this.bookList = await this.apiCall('/books');
+                    } catch (error) {
+                        console.error('Error loading library:', error);
+                        this.$message.error('Failed to load library: ' + error.message);
+                    }
+                },
+                
+                async loadUserData() {
+                    try {
+                        // Load rentals
+                        this.userRentals = await this.apiCall('/user/rentals');
+                        
+                        // Load queue
+                        this.userQueue = await this.apiCall('/user/queue');
+                    } catch (error) {
+                        console.error('Error loading user data:', error);
+                    }
+                },
+                
+                // Book Operations - This is the key function that loads the actual book content
+                async openBook(bookInfo) {
+                    try {
+                        // Check if user has access to this book
+                        const response = await this.apiCall(`/books/${bookInfo.id}/read`);
+                        
+                        this.currentBook = {
+                            ...bookInfo,
+                            type: bookInfo.file_type,
+                            file_path: response.book.file_path
+                        };
+                        
+                        this.isReady = false;
+                        this.loadError = null;
+                        
+                        // Load the actual document content
+                        await this.loadDocument(this.currentBook);
+                        this.isReady = true;
+                        
+                    } catch (error) {
+                        console.error('Error opening book:', error);
+                        this.loadError = `Failed to open book: ${error.message}`;
+                        this.$message.error(`Error opening book: ${error.message}`);
+                    }
+                },
+                
+                async openRentedBook(rental) {
+                    try {
+                        // Get book details
+                        const book = this.bookList.find(b => b.id === rental.book_id);
+                        if (!book) {
+                            throw new Error('Book not found');
+                        }
+                        
+                        this.currentBook = {
+                            ...book,
+                            type: book.file_type
+                        };
+                        
+                        this.isReady = false;
+                        this.loadError = null;
+                        
+                        await this.loadDocument(this.currentBook);
+                        this.isReady = true;
+                        
+                    } catch (error) {
+                        console.error('Error opening rented book:', error);
+                        this.loadError = `Failed to open book: ${error.message}`;
+                        this.$message.error(`Error opening book: ${error.message}`);
+                    }
+                },
+                
+                async rentBook(book) {
+                    try {
+                        await this.apiCall('/books/rent', {
+                            method: 'POST',
+                            body: { bookId: book.id }
+                        });
+                        
+                        this.$message.success(`You have successfully rented "${book.title}" for 21 days`);
+                        
+                        // Reload data
+                        await this.loadLibrary();
+                        await this.loadUserData();
+                        
+                    } catch (error) {
+                        console.error('Error renting book:', error);
+                        this.$message.error('Error renting book: ' + error.message);
+                    }
+                },
+                
+                async rentBookFromQueue(queueItem) {
+                    try {
+                        await this.apiCall('/books/rent', {
+                            method: 'POST',
+                            body: { bookId: queueItem.book_id }
+                        });
+                        
+                        this.$message.success(`You have successfully rented "${queueItem.title}" for 21 days`);
+                        
+                        // Remove from queue and reload data
+                        await this.removeFromQueue(queueItem);
+                        await this.loadLibrary();
+                        await this.loadUserData();
+                        
+                    } catch (error) {
+                        console.error('Error renting book from queue:', error);
+                        this.$message.error('Error renting book: ' + error.message);
+                    }
+                },
+                
+                async addToQueue(book) {
+                    try {
+                        await this.apiCall('/queue/add', {
+                            method: 'POST',
+                            body: { bookId: book.id }
+                        });
+                        
+                        this.$message.success(`"${book.title}" has been added to your queue`);
+                        
+                        // Reload user data
+                        await this.loadUserData();
+                        
+                    } catch (error) {
+                        console.error('Error adding to queue:', error);
+                        this.$message.error('Error adding to queue: ' + error.message);
+                    }
+                },
+                
+                async removeFromQueue(queueItem) {
+                    try {
+                        await this.apiCall('/queue/remove', {
+                            method: 'DELETE',
+                            body: { queueId: queueItem.id }
+                        });
+                        
+                        this.$message.success('Removed from queue');
+                        
+                        // Reload user data
+                        await this.loadUserData();
+                        
+                    } catch (error) {
+                        console.error('Error removing from queue:', error);
+                        this.$message.error('Error removing from queue: ' + error.message);
+                    }
+                },
+                
+                async returnBook(rental) {
+                    try {
+                        await this.apiCall('/books/return', {
+                            method: 'POST',
+                            body: {
+                                rentalId: rental.id,
+                                bookId: rental.book_id
+                            }
+                        });
+                        
+                        this.$message.success('Book returned successfully');
+                        
+                        // Reload data
+                        await this.loadLibrary();
+                        await this.loadUserData();
+                        
+                    } catch (error) {
+                        console.error('Error returning book:', error);
+                        this.$message.error('Error returning book: ' + error.message);
+                    }
+                },
+                
+                // Helper methods
+                hasRentedBook(bookId) {
+                    return this.userRentals.some(rental => rental.book_id === bookId);
+                },
+                
+                hasQueuedBook(bookId) {
+                    return this.userQueue.some(item => item.book_id === bookId);
+                },
+                
+                isBookAvailable(bookId) {
+                    const book = this.bookList.find(b => b.id === bookId);
+                    return book && book.available_copies > 0;
+                },
+                
+                getBookFileType(bookId) {
+                    const book = this.bookList.find(b => b.id === bookId);
+                    return book ? book.file_type : null;
+                },
+                
+                getRentalStatusClass(rental) {
+                    const dueDate = new Date(rental.due_date);
+                    const today = new Date();
+                    const daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysUntilDue < 0) {
+                        return 'status-overdue';
+                    } else if (daysUntilDue <= 3) {
+                        return 'status-due';
+                    } else {
+                        return 'status-active';
+                    }
+                },
+                
+                getRentalStatusText(rental) {
+                    const dueDate = new Date(rental.due_date);
+                    const today = new Date();
+                    const daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysUntilDue < 0) {
+                        return `Overdue by ${Math.abs(daysUntilDue)} days`;
+                    } else if (daysUntilDue <= 3) {
+                        return `Due in ${daysUntilDue} days`;
+                    } else {
+                        return 'Active';
+                    }
+                },
+                
+                formatDate(dateString) {
+                    return new Date(dateString).toLocaleDateString();
+                },
+                
+                // Document Loading - This is the core function that loads the actual book content
+                async loadDocument(book) {
+                    const fileUrl = `http://localhost:3000${book.file_path}`;
+                    
+                    switch(book.type) {
+                        case 'pdf':
+                            await this.loadPDF(fileUrl);
+                            break;
+                        case 'docx':
+                        case 'doc':
+                            await this.loadDOCX(fileUrl);
+                            break;
+                        case 'txt':
+                            await this.loadTXT(fileUrl);
+                            break;
+                        default:
+                            throw new Error(`Unsupported file type: ${book.type}`);
+                    }
+                },
+                
+                // PDF Loader
+                async loadPDF(url) {
+                    try {
+                        const response = await fetch(url, {
+                            headers: {
+                                'Authorization': `Bearer ${this.token}`
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch PDF file');
+                        }
+                        
+                        const arrayBuffer = await response.arrayBuffer();
+                        this.pdfDoc = await pdfjsLib.getDocument(arrayBuffer).promise;
+                        this.pdfPages = [];
+                        
+                        for (let i = 1; i <= this.pdfDoc.numPages; i++) {
+                            this.pdfPages.push({ pageNumber: i });
+                        }
+                        
+                        await this.renderPDFPages();
+                    } catch (error) {
+                        throw new Error(`PDF loading failed: ${error.message}`);
+                    }
+                },
+                
+                async renderPDFPages() {
+                    for (let page of this.pdfPages) {
+                        const pdfPage = await this.pdfDoc.getPage(page.pageNumber);
+                        const canvas = document.getElementById(`pdf-page-${page.pageNumber}`);
+                        if (!canvas) continue;
+                        
+                        const context = canvas.getContext('2d');
+                        const viewport = pdfPage.getViewport({ scale: this.zoomLevel * 1.5 });
+                        
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+                        
+                        await pdfPage.render({
+                            canvasContext: context,
+                            viewport: viewport
+                        }).promise;
+                    }
+                },
+                
+                // DOCX/DOC Loader
+                async loadDOCX(url) {
+                    try {
+                        if (typeof mammoth === 'undefined') {
+                            throw new Error('DOCX library not loaded. Please check your internet connection.');
+                        }
+                        
+                        const response = await fetch(url, {
+                            headers: {
+                                'Authorization': `Bearer ${this.token}`
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch DOCX file');
+                        }
+                        
+                        const arrayBuffer = await response.arrayBuffer();
+                        const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+                        
+                        if (result.value) {
+                            this.docxContent = result.value;
+                        } else {
+                            throw new Error('No content could be extracted from the document');
+                        }
+                    } catch (error) {
+                        console.error('DOCX conversion error:', error);
+                        this.docxContent = `
+                            <div style="text-align: center; padding: 50px;">
+                                <h3>Unable to display DOCX content</h3>
+                                <p>Error: ${error.message}</p>
+                                <p>Try downloading the file and opening it with Microsoft Word or LibreOffice.</p>
+                            </div>
+                        `;
+                        throw error;
+                    }
+                },
+                
+                // TXT Loader
+                async loadTXT(url) {
+                    try {
+                        const response = await fetch(url, {
+                            headers: {
+                                'Authorization': `Bearer ${this.token}`
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch text file');
+                        }
+                        
+                        this.txtContent = await response.text();
+                        if (!this.txtContent.trim()) {
+                            throw new Error('File appears to be empty');
+                        }
+                    } catch (error) {
+                        throw new Error(`Text file loading failed: ${error.message}`);
+                    }
+                },
+                
+                // Navigation Methods
+                prevPage() {
+                    if (this.rendition) {
+                        this.rendition.prev();
+                    }
+                },
+                
+                nextPage() {
+                    if (this.rendition) {
+                        this.rendition.next();
+                    }
+                },
+                
+                goBack() {
+                    this.currentBook = null;
+                    this.currentView = 'library';
+                },
+                
+                zoomIn() {
+                    this.zoomLevel = Math.min(3.0, this.zoomLevel + 0.1);
+                    this.applyZoom();
+                },
+                
+                zoomOut() {
+                    this.zoomLevel = Math.max(0.5, this.zoomLevel - 0.1);
+                    this.applyZoom();
+                },
+                
+                applyZoom() {
+                    const effectiveSize = this.fontSize * this.zoomLevel;
+                    
+                    if (this.currentBook.type === 'pdf') {
+                        this.renderPDFPages();
+                    } else if (this.currentBook.type === 'docx' || this.currentBook.type === 'doc') {
+                        const content = document.querySelector('.docx-content');
+                        if (content) {
+                            content.style.fontSize = `${effectiveSize}px`;
+                        }
+                    } else if (this.currentBook.type === 'txt') {
+                        const content = document.querySelector('.txt-content');
+                        if (content) {
+                            content.style.fontSize = `${effectiveSize}px`;
+                        }
+                    }
+                },
+                
+                applyTheme() {
+                    // Save theme to localStorage
+                    localStorage.setItem('reader-theme', this.theme);
+                    
+                    // Update PDF container background
+                    this.updatePDFBackground();
+                },
+                
+                updatePDFBackground() {
+                    if (this.currentBook && this.currentBook.type === 'pdf') {
+                        const pdfContainer = document.getElementById('pdf-container');
+                        if (pdfContainer) {
+                            // Background color will be applied via CSS based on theme class
+                        }
+                    }
+                },
+                
+                toggleSearch() {
+                    this.searchVisible = !this.searchVisible;
+                    this.searchText = '';
+                    this.searchResults = [];
+                },
+                
+                onSearch() {
+                    if (!this.searchText.trim()) {
+                        this.searchResults = [];
+                        return;
+                    }
+                    
+                    const searchTerm = this.searchText.toLowerCase();
+                    this.searchResults = [];
+                    
+                    if (this.currentBook.type === 'txt') {
+                        const lines = this.txtContent.split('\n');
+                        lines.forEach((line, index) => {
+                            if (line.toLowerCase().includes(searchTerm)) {
+                                this.searchResults.push({
+                                    text: line.trim() || '(empty line)',
+                                    index: index,
+                                    type: 'line'
+                                });
+                            }
+                        });
+                    } else if (this.currentBook.type === 'docx' || this.currentBook.type === 'doc') {
+                        // Simple text search in DOCX content
+                        const textContent = this.docxContent.replace(/<[^>]*>/g, ' ');
+                        const sentences = textContent.split(/[.!?]+/).filter(s => s.trim());
+                        sentences.forEach((sentence, index) => {
+                            if (sentence.toLowerCase().includes(searchTerm)) {
+                                this.searchResults.push({
+                                    text: sentence.trim().substring(0, 100) + '...',
+                                    index: index,
+                                    type: 'sentence'
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Limit results
+                    this.searchResults = this.searchResults.slice(0, 20);
+                },
+                
+                goToSearchResult(result) {
+                    if (this.currentBook.type === 'txt') {
+                        const txtElement = document.querySelector('.txt-content');
+                        const lines = this.txtContent.split('\n');
+                        const approxPosition = (result.index / lines.length) * txtElement.scrollHeight;
+                        txtElement.scrollTop = approxPosition;
+                    }
+                    this.searchVisible = false;
+                },
+                
+                showSettings() {
+                    this.settingsVisible = true;
+                },
+                
+                onProgressChange(value) {
+                    if (this.currentBook.type === 'pdf') {
+                        const pageNumber = Math.ceil((value / 100) * this.pdfDoc.numPages);
+                        const pageElement = document.getElementById(`pdf-page-${pageNumber}`);
+                        if (pageElement) {
+                            pageElement.scrollIntoView();
+                        }
+                    }
+                },
+                
+                formatProgress(value) {
+                    return `${value.toFixed(1)}%`;
+                }
+            },
+            
+            watch: {
+                fontSize() {
+                    this.applyZoom();
+                },
+                
+                zoomLevel() {
+                    this.applyZoom();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
