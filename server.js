@@ -101,16 +101,20 @@ async function initializeDatabase() {
       )
     `);
 
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS queue (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        book_id INT,
-        user_id INT,
-        added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-      )
-    `);
+ // Update the queue table to track when the book becomes available for each user
+await connection.execute(`
+  CREATE TABLE IF NOT EXISTS queue (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    book_id INT,
+    user_id INT,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    available_at TIMESTAMP NULL, -- When the book becomes available for this user
+    expires_at TIMESTAMP NULL, -- When the reservation expires (2 days after available_at)
+    status ENUM('waiting', 'available', 'expired') DEFAULT 'waiting',
+    FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  )
+`);
 
     // Create documents directory if it doesn't exist
    if (!fs.existsSync('documents')) fs.mkdirSync('documents', { recursive: true });
@@ -143,6 +147,8 @@ function authenticateToken(req, res, next) {
 }
 
 // Helper function to process queue when book is returned
+// Update the processQueue function to handle the LIMIT parameter correctly
+// Fix the processQueue function - remove parameter binding for LIMIT
 async function processQueue(bookId) {
   try {
     const [books] = await pool.execute('SELECT * FROM books WHERE id = ?', [bookId]);
@@ -151,48 +157,66 @@ async function processQueue(bookId) {
     const book = books[0];
     
     if (book.available_copies > 0) {
-      // Get first person in queue
+      // Get waiting users in queue order - use template literal for LIMIT
       const [queueItems] = await pool.execute(`
           SELECT * FROM queue 
-          WHERE book_id = ? 
+          WHERE book_id = ? AND status = 'waiting'
           ORDER BY added_at ASC 
-          LIMIT 1
+          LIMIT ${book.available_copies}
       `, [bookId]);
 
-      if (queueItems.length > 0) {
-        const firstInQueue = queueItems[0];
+      console.log(`Processing queue for book "${book.title}": ${queueItems.length} users can be moved to available status`);
+
+      // Mark these users as having the book available
+      const now = new Date();
+      const expiryDate = new Date(now.getTime() + (2 * 24 * 60 * 60 * 1000)); // 2 days from now
+      
+      for (const queueItem of queueItems) {
+        await pool.execute(
+          'UPDATE queue SET status = "available", available_at = ?, expires_at = ? WHERE id = ?',
+          [now, expiryDate, queueItem.id]
+        );
         
-        // Here you would typically send a notification
-        console.log(`Book "${book.title}" is now available. Notifying user ${firstInQueue.user_id} who is first in queue.`);
-        
-        // You can implement email/notification logic here
-        // For now, we'll just log it
+        console.log(`Book "${book.title}" is now available for user ${queueItem.user_id}. Reservation expires at ${expiryDate}`);
       }
     }
   } catch (error) {
     console.error('Process queue error:', error);
   }
 }
-
 // Clean up expired queue entries (call this periodically)
 async function cleanupExpiredQueue() {
   try {
-    // Delete queue entries older than 2 days where user hasn't rented
+    // Delete queue entries where reservation has expired
     const result = await pool.execute(`
-        DELETE q FROM queue q
-        LEFT JOIN rentals r ON q.book_id = r.book_id AND q.user_id = r.user_id AND r.status = 'active'
-        WHERE q.added_at < DATE_SUB(NOW(), INTERVAL 2 DAY)
-        AND r.id IS NULL
+        DELETE FROM queue 
+        WHERE status = 'available' 
+        AND expires_at < NOW()
     `);
 
-    console.log(`Cleaned up ${result[0].affectedRows} expired queue entries`);
+    console.log(`Cleaned up ${result[0].affectedRows} expired reservations`);
+    
+    // Process queue for books that now have available copies
+    if (result[0].affectedRows > 0) {
+      // Get books that had expired reservations
+      const [affectedBooks] = await pool.execute(`
+          SELECT DISTINCT book_id FROM queue 
+          WHERE status = 'available' 
+          AND expires_at < NOW()
+      `);
+      
+      // Process queue for each affected book
+      for (const book of affectedBooks) {
+        await processQueue(book.book_id);
+      }
+    }
+    
     return result[0].affectedRows;
   } catch (error) {
     console.error('Queue cleanup error:', error);
     return 0;
   }
 }
-
 // Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -289,6 +313,7 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Books endpoints with queue information
 // Update the books endpoint to include queue information
+// Update the books endpoint to include proper queue information
 app.get('/api/books', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -302,19 +327,32 @@ app.get('/api/books', authenticateToken, async (req, res) => {
         FROM queue q 
         JOIN users u ON q.user_id = u.id 
         WHERE q.book_id = ? 
-        ORDER BY q.added_at ASC
+        ORDER BY 
+          CASE 
+            WHEN q.status = 'available' THEN 1
+            WHEN q.status = 'waiting' THEN 2
+            ELSE 3
+          END,
+          q.added_at ASC
       `, [book.id]);
       
+      // Find user's position and status
+      const userQueueItem = queueItems.find(item => item.user_id === userId);
       const userPosition = queueItems.findIndex(item => item.user_id === userId) + 1;
-      const userInQueue = queueItems.some(item => item.user_id === userId);
+      const userInQueue = !!userQueueItem;
       const isFirstInQueue = userPosition === 1 && userInQueue;
+      const hasReservation = userQueueItem && userQueueItem.status === 'available';
       
       // Calculate if book is effectively available for this user
-      // Book is effectively available only if:
-      // 1. There are available copies AND
-      // 2. Either no one is in queue OR user is first in queue
-      const effectiveAvailable = book.available_copies > 0 && 
-                               (queueItems.length === 0 || isFirstInQueue);
+      // Book is effectively available only if user has an active reservation
+      const effectiveAvailable = hasReservation;
+
+      // Calculate time remaining for reservation
+      let timeRemaining = null;
+      if (hasReservation && userQueueItem.expires_at) {
+        const expiryDate = new Date(userQueueItem.expires_at);
+        timeRemaining = expiryDate - new Date();
+      }
       
       return {
         ...book,
@@ -323,10 +361,14 @@ app.get('/api/books', authenticateToken, async (req, res) => {
           userPosition: userInQueue ? userPosition : null,
           isFirstInQueue,
           userInQueue,
+          hasReservation,
           effectiveAvailable,
-          queueAddedAt: userInQueue ? queueItems.find(item => item.user_id === userId).added_at : null,
+          timeRemaining: timeRemaining > 0 ? timeRemaining : null,
+          expiresAt: userQueueItem ? userQueueItem.expires_at : null,
+          availableAt: userQueueItem ? userQueueItem.available_at : null,
+          queueStatus: userQueueItem ? userQueueItem.status : null,
           // Add this to help frontend logic
-          canJoinQueue: !userInQueue && (book.available_copies <= 0 || queueItems.length > 0)
+          canJoinQueue: !userInQueue && book.available_copies <= 0
         }
       };
     }));
@@ -556,7 +598,6 @@ app.delete('/api/queue/remove', authenticateToken, async (req, res) => {
   }
 });
 
-// Return book endpoint
 app.post('/api/books/return', authenticateToken, async (req, res) => {
   const { rentalId, bookId } = req.body;
   const userId = req.user.id;
@@ -584,7 +625,9 @@ app.post('/api/books/return', authenticateToken, async (req, res) => {
       [bookId]
     );
 
-    // Process queue for this book
+    console.log(`Book ${bookId} returned. Processing queue...`);
+    
+    // Process queue for this book IMMEDIATELY
     await processQueue(bookId);
 
     res.json({ success: true, message: 'Book returned successfully' });
@@ -593,7 +636,18 @@ app.post('/api/books/return', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to return book' });
   }
 });
-
+// Add a new endpoint to manually trigger queue processing (for testing)
+app.post('/api/queue/process/:bookId', authenticateToken, async (req, res) => {
+  const bookId = req.params.bookId;
+  
+  try {
+    await processQueue(bookId);
+    res.json({ success: true, message: 'Queue processed successfully' });
+  } catch (error) {
+    console.error('Manual queue process error:', error);
+    res.status(500).json({ error: 'Failed to process queue' });
+  }
+});
 // Rent book endpoint with queue priority
 app.post('/api/books/rent', authenticateToken, async (req, res) => {
   const { bookId } = req.body;
@@ -609,28 +663,36 @@ app.post('/api/books/rent', authenticateToken, async (req, res) => {
 
     const book = books[0];
     
-    // Get queue information
-    const [queueItems] = await pool.execute(`
+    // Check if user has an active reservation (book is available for them)
+    const [userReservations] = await pool.execute(`
         SELECT * FROM queue 
-        WHERE book_id = ? 
-        ORDER BY added_at ASC
-    `, [bookId]);
+        WHERE book_id = ? AND user_id = ? AND status = 'available'
+    `, [bookId, userId]);
 
-    // Check if user is first in queue when book is available
-    if (book.available_copies > 0 && queueItems.length > 0) {
-      const firstInQueue = queueItems[0];
-      if (firstInQueue.user_id !== userId) {
+    const hasReservation = userReservations.length > 0;
+    
+    // If book is available but user doesn't have reservation, check if someone else does
+    if (book.available_copies > 0 && !hasReservation) {
+      const [activeReservations] = await pool.execute(`
+          SELECT * FROM queue 
+          WHERE book_id = ? AND status = 'available'
+      `, [bookId]);
+
+      // If there are active reservations, book is reserved for those users
+      if (activeReservations.length > 0) {
         return res.status(400).json({ 
-          error: 'Book is reserved for the first person in queue',
+          error: 'Book is reserved for users in queue',
           reserved: true,
           available: false
         });
       }
     }
 
-    // Check if book is available (either no queue or user is first)
+    // Allow rental if:
+    // 1. Book is available AND user has reservation, OR
+    // 2. Book is available AND no one has reservation
     const canRent = book.available_copies > 0 && 
-                   (queueItems.length === 0 || queueItems[0].user_id === userId);
+                   (hasReservation || !hasReservation);
 
     if (!canRent) {
       return res.status(400).json({ 
@@ -661,7 +723,7 @@ app.post('/api/books/rent', authenticateToken, async (req, res) => {
       [bookId]
     );
 
-    // Remove user from queue if they were in it
+    // Remove user from queue (whether waiting or available)
     await pool.execute(
       'DELETE FROM queue WHERE book_id = ? AND user_id = ?',
       [bookId, userId]

@@ -912,6 +912,21 @@
     margin: 5px 0;
     line-height: 1.4;
 }
+ .bookmark {
+                right: 20px;
+                height: 40px;
+                width: 30px;
+            }
+    .bookmark {
+            position: absolute;
+            top: 0;
+            right: 20px; /* Adjusted position */
+            width: 20px; /* Thinner bookmark */
+            height: 60px; /* Shorter bookmark */
+            background-color: #8B4513; /* Same color as the book cover */
+            z-index: 10;
+            clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%); /* Creates the pointed bottom */
+        }
 
 .availability-status {
     font-size: 11px;
@@ -1005,6 +1020,37 @@
     justify-content: center;
     font-weight: bold;
 }
+/* Add to your CSS */
+.queue-countdown-timer {
+    margin-top: 5px;
+    padding: 3px 8px;
+    background: linear-gradient(45deg, #ff9800, #ff5722);
+    color: white;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: bold;
+    animation: pulse 1.5s infinite;
+}
+
+.queue-position-info {
+    margin-top: 3px;
+    font-size: 10px;
+    color: #666;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Enhanced status styles */
+.status-first-queue {
+    background: linear-gradient(45deg, #4caf50, #8bc34a) !important;
+    color: white !important;
+    border: 2px solid #388e3c !important;
+    font-weight: bold;
+}
 </style>
 </head>
 <body>
@@ -1022,8 +1068,8 @@
                 <div class="control-group">
                     <el-button icon="el-icon-zoom-out" circle @click="zoomOut" size="small"></el-button>
                     <el-button icon="el-icon-zoom-in" circle @click="zoomIn" size="small"></el-button>
-                    <el-button icon="el-icon-search" circle @click="toggleSearch" size="small"></el-button>
-                    <el-button icon="el-icon-s-operation" circle @click="showSettings" size="small"></el-button>
+                    <!-- <el-button icon="el-icon-search" circle @click="toggleSearch" size="small"></el-button>
+                    <el-button icon="el-icon-s-operation" circle @click="showSettings" size="small"></el-button> -->
                     <el-button icon="el-icon-switch-button" circle @click="logout" size="small"></el-button>
                 </div>
             </div>
@@ -1170,6 +1216,7 @@
             
             <!-- Right Page: Login or Library -->
             <div class="right-page page" :class="`theme-${theme}`">
+                <div class="bookmark"></div>
                 <!-- Login View -->
                 <div v-if="!isAuthenticated" class="login-container">
                     <h2 class="login-title">Library Login</h2>
@@ -1217,58 +1264,65 @@
             <span v-else>📁</span>
         </div>
     </div>
-    <div class="book-info">
-        <h3>{{ book.title }}</h3>
-        <p>{{ book.author || 'Unknown Author' }}</p>
+<div class="book-info">
+    <h3>{{ book.title }}</h3>
+    <p>{{ book.author || 'Unknown Author' }}</p>
+    
+    <!-- Queue and Availability Information -->
+    <div class="availability-info">
+        <span class="availability-status" :class="getQueueStatusDisplay(book).class">
+            {{ getQueueStatusDisplay(book).text }}
+        </span>
         
-        <!-- Queue and Availability Information -->
-        <div class="availability-info">
-            <span class="availability-status" :class="getQueueStatusDisplay(book).class">
-                {{ getQueueStatusDisplay(book).text }}
-            </span>
-            
-            <!-- Additional queue details -->
-            <div v-if="book.queueInfo && book.queueInfo.userInQueue && !book.queueInfo.isFirstInQueue" 
-                 class="queue-countdown">
-                <small>Expires in: {{ formatQueueTimeRemaining(getQueueExpiryTime(book.queueInfo.queueAddedAt) - new Date()) }}</small>
-            </div>
+        <!-- Countdown Timer - Only show when book is reserved for user -->
+        <div v-if="book.queueInfo && book.queueInfo.hasReservation && book.queueInfo.timeRemaining > 0" 
+             class="queue-countdown-timer">
+            <small>⏰ Rent within: {{ formatQueueTimeRemaining(book.queueInfo.timeRemaining) }}</small>
         </div>
         
-        <span class="file-type">{{ book.file_type ? book.file_type.toUpperCase() : 'UNKNOWN' }}</span>
+        <!-- Show queue position details -->
+        <div v-else-if="book.queueInfo && book.queueInfo.userInQueue && !book.queueInfo.hasReservation" 
+             class="queue-position-info">
+            <small>You are position {{ book.queueInfo.userPosition }} of {{ book.queueInfo.totalInQueue }}</small>
+        </div>
     </div>
-    <div class="book-actions">
-        <!-- Show rent button only if effectively available to this user -->
-        <el-button v-if="book.queueInfo && book.queueInfo.effectiveAvailable && !hasRentedBook(book.id)" 
-                   size="mini" 
-                   type="primary" 
-                   @click.stop="rentBook(book)">
-            Rent Now
-        </el-button>
-        
-        <!-- Special rent button for first in queue -->
-        <el-button v-else-if="book.queueInfo && book.queueInfo.isFirstInQueue && book.available_copies > 0" 
-                   size="mini" 
-                   type="success" 
-                   @click.stop="rentBook(book)">
-            Rent (You're First!)
-        </el-button>
-        
-        <!-- Show queue button if not in queue and book is reserved/unavailable -->
-      <el-button v-else-if="book.queueInfo && book.queueInfo.canJoinQueue"
-           size="mini" 
-           type="warning" 
-           @click.stop="addToQueue(book)"
-           :disabled="hasRentedBook(book.id)">
+    
+    <span class="file-type">{{ book.file_type ? book.file_type.toUpperCase() : 'UNKNOWN' }}</span>
+</div>
+<div class="book-actions">
+  <!-- Show rent button if user has reservation -->
+  <el-button v-if="book.queueInfo && book.queueInfo.hasReservation" 
+             size="mini" 
+             type="success" 
+             @click.stop="rentBook(book)">
+    Rent Now (Reserved!)
+  </el-button>
+  
+  <!-- Show rent button if book is available and no reservations exist -->
+  <el-button v-else-if="book.available_copies > 0 && book.queueInfo && book.queueInfo.totalInQueue === 0" 
+             size="mini" 
+             type="primary" 
+             @click.stop="rentBook(book)">
+    Rent Now
+  </el-button>
+  
+  <!-- Show join queue button if book is unavailable -->
+  <el-button v-else-if="book.queueInfo && book.queueInfo.canJoinQueue"
+             size="mini" 
+             type="warning" 
+             @click.stop="addToQueue(book)"
+             :disabled="hasRentedBook(book.id)">
     Join Queue
-</el-button>
-        
-        <!-- Show leave queue button if in queue but not first -->
-        <el-button v-else-if="book.queueInfo && book.queueInfo.userInQueue && !book.queueInfo.isFirstInQueue"
-                   size="mini" 
-                   type="danger" 
-                   @click.stop="removeFromQueue(getQueueItem(book.id))">
-            Leave Queue
-        </el-button>
+  </el-button>
+  
+  <!-- Show leave queue button if in queue but no reservation yet -->
+  <el-button v-else-if="book.queueInfo && book.queueInfo.userInQueue && !book.queueInfo.hasReservation"
+             size="mini" 
+             type="danger" 
+             @click.stop="removeFromQueue(getQueueItem(book.id))">
+    Leave Queue
+  </el-button>
+</div>
         
         <!-- Add to favorites (always available) -->
         <el-button v-if="!hasQueuedBook(book.id) && book.queueInfo && !book.queueInfo.userInQueue"
@@ -1452,7 +1506,8 @@
                     txtContent: '',
                     
                     // Timer for countdown updates
-                    countdownTimer: null
+                    countdownTimer: null,
+                    queueTimer: null,
                 };
             },
             
@@ -1470,39 +1525,47 @@
                 }
             },
             
-            async mounted() {
-                // Check for existing authentication
-                const token = localStorage.getItem('reader-token');
-                const user = localStorage.getItem('reader-user');
-                
-                if (token && user) {
-                    this.token = token;
-                    this.user = JSON.parse(user);
-                    this.isAuthenticated = true;
-                    
-                    // Load saved theme from localStorage
-                    const savedTheme = localStorage.getItem('reader-theme');
-                    if (savedTheme) {
-                        this.theme = savedTheme;
-                    }
-                    
-                    await this.loadLibrary();
-                    await this.loadUserData();
-                    this.applyTheme();
-                    
-                    // Start countdown timer for rentals
-                    this.startCountdownTimer();
-                }
-                
-                // Set initial tab based on screen size
-                if (this.isMobile) {
-                    this.currentTab = 'rentals';
-                }
-                
-                // Add resize listener
-                window.addEventListener('resize', this.handleResize);
-            },
-            
+async mounted() {
+    // Check for existing authentication
+    const token = localStorage.getItem('reader-token');
+    const user = localStorage.getItem('reader-user');
+    
+    if (token && user) {
+        this.token = token;
+        this.user = JSON.parse(user);
+        this.isAuthenticated = true;
+        
+        // Load saved theme from localStorage
+        const savedTheme = localStorage.getItem('reader-theme');
+        if (savedTheme) {
+            this.theme = savedTheme;
+        }
+        
+        await this.loadLibrary();
+        await this.loadUserData();
+        this.applyTheme();
+        
+        // Start countdown timer for rentals
+        this.startCountdownTimer();
+        
+        // Start queue timer updates - FIX: Add this line
+        this.startQueueTimer();
+    }
+    
+    // Set initial tab based on screen size
+    if (this.isMobile) {
+        this.currentTab = 'rentals';
+    }
+    
+    // Add resize listener
+    window.addEventListener('resize', this.handleResize);
+},
+       startQueueTimer() {
+    // Update queue timers every second
+    this.queueTimer = setInterval(() => {
+        this.updateQueueTimers();
+    }, 1000);
+},     
             beforeDestroy() {
                 // Clear timer and event listener
                 if (this.countdownTimer) {
@@ -1746,24 +1809,75 @@ async loadQueueDetails(bookId) {
         return { queue: [], userPosition: null, totalInQueue: 0, userInQueue: false };
     }
 },
-
-// Format time remaining for queue
-formatQueueTimeRemaining(timeRemainingMs) {
-    if (timeRemainingMs <= 0) return 'Expired';
-    
-    const days = Math.floor(timeRemainingMs / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((timeRemainingMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((timeRemainingMs % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (days > 0) {
-        return `${days}d ${hours}h`;
-    } else if (hours > 0) {
-        return `${hours}h ${minutes}m`;
-    } else {
-        return `${minutes}m`;
+// Add this method to update timers in real-time
+updateQueueTimers() {
+    if (this.isAuthenticated && this.bookList.length > 0) {
+        let needsRefresh = false;
+        
+        this.bookList.forEach(book => {
+            if (book.queueInfo && book.queueInfo.timeRemaining) {
+                // Update the time remaining every second
+                if (book.queueInfo.timeRemaining > 0) {
+                    book.queueInfo.timeRemaining -= 1000;
+                    
+                    // If timer just expired, mark for refresh
+                    if (book.queueInfo.timeRemaining <= 0) {
+                        needsRefresh = true;
+                    }
+                }
+            }
+        });
+        
+        // Force Vue to update the view
+        this.$forceUpdate();
+        
+        // Refresh data if any timers expired
+        if (needsRefresh) {
+            setTimeout(() => {
+                this.loadLibrary();
+                this.loadUserData();
+            }, 2000);
+        }
     }
 },
 
+// Call this in mounted to start the timer
+mounted() {
+  // ... existing code ...
+  
+  // Start queue timer updates
+  this.queueTimer = setInterval(this.updateQueueTimers, 1000);
+},
+
+// Don't forget to clear the timer
+beforeDestroy() {
+    // Clear timer and event listener
+    if (this.countdownTimer) {
+        clearInterval(this.countdownTimer);
+    }
+    if (this.queueTimer) {
+        clearInterval(this.queueTimer);
+    }
+    window.removeEventListener('resize', this.handleResize);
+},
+// Format time remaining for queue reservation
+// Format time remaining for queue reservation - make it more user-friendly
+formatQueueTimeRemaining(timeRemainingMs) {
+  if (!timeRemainingMs || timeRemainingMs <= 0) return 'Expired!';
+  
+  const totalSeconds = Math.floor(timeRemainingMs / 1000);
+  const days = Math.floor(totalSeconds / (3600 * 24));
+  const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  
+  if (days > 0) {
+    return `${days} day${days > 1 ? 's' : ''} ${hours} hour${hours > 1 ? 's' : ''}`;
+  } else if (hours > 0) {
+    return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${minutes > 1 ? 's' : ''}`;
+  } else {
+    return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+  }
+},
 // Calculate queue expiry time
 getQueueExpiryTime(addedAt) {
     const joinDate = new Date(addedAt);
@@ -1805,38 +1919,44 @@ async rentBook(book) {
         }
     }
 },
-// Add method to get queue status display
+// Update the method to get queue status display
+// Update the getQueueStatusDisplay method to be more accurate
 getQueueStatusDisplay(book) {
     if (!book.queueInfo) {
-        return { type: 'unknown', text: 'Loading...' };
+        return { type: 'unknown', text: 'Loading...', class: 'status-unavailable' };
     }
     
     const queueInfo = book.queueInfo;
     
-    if (queueInfo.effectiveAvailable) {
+    // Debug log to see what's happening
+    console.log('Book:', book.title, 'QueueInfo:', queueInfo);
+    
+    if (queueInfo.hasReservation && queueInfo.timeRemaining > 0) {
+        const timeRemaining = this.formatQueueTimeRemaining(queueInfo.timeRemaining);
+        return { 
+            type: 'reserved', 
+            text: `Reserved for you! ⏰ ${timeRemaining} left`,
+            class: 'status-first-queue'
+        };
+    } else if (queueInfo.hasReservation && queueInfo.timeRemaining <= 0) {
+        return { 
+            type: 'expired', 
+            text: 'Reservation expired!',
+            class: 'status-unavailable'
+        };
+    } else if (queueInfo.userInQueue && queueInfo.queueStatus === 'waiting') {
+        return { 
+            type: 'in-queue', 
+            text: `Position ${queueInfo.userPosition} of ${queueInfo.totalInQueue} (Waiting)`,
+            class: 'status-in-queue'
+        };
+    } else if (book.available_copies > 0 && queueInfo.totalInQueue === 0) {
         return { 
             type: 'available', 
-            text: 'Available for you',
+            text: `${book.available_copies} available`,
             class: 'status-available'
         };
-    } else if (queueInfo.userInQueue) {
-        if (queueInfo.isFirstInQueue && book.available_copies > 0) {
-            return { 
-                type: 'first-in-queue', 
-                text: `Available! You're first in queue`,
-                class: 'status-first-queue'
-            };
-        } else {
-            const expiryTime = this.getQueueExpiryTime(queueInfo.queueAddedAt);
-            const timeRemaining = this.formatQueueTimeRemaining(expiryTime - new Date());
-            
-            return { 
-                type: 'in-queue', 
-                text: `Position ${queueInfo.userPosition} of ${queueInfo.totalInQueue} (${timeRemaining} left)`,
-                class: 'status-in-queue'
-            };
-        }
-    } else if (book.available_copies > 0) {
+    } else if (book.available_copies > 0 && queueInfo.totalInQueue > 0) {
         return { 
             type: 'reserved', 
             text: `Reserved (${queueInfo.totalInQueue} in queue)`,
