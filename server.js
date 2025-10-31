@@ -60,74 +60,20 @@ async function initializeDatabase() {
   try {
     const connection = await pool.getConnection();
     
-    // Create tables (same as SQL above)
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        name VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS books (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        author VARCHAR(255) NOT NULL,
-        description TEXT,
-        total_copies INT DEFAULT 1,
-        available_copies INT DEFAULT 1,
-        file_path VARCHAR(500),
-        file_type ENUM('pdf', 'doc', 'docx', 'txt'),
-        file_size INT,
-        cover_image VARCHAR(500),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS rentals (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        book_id INT,
-        user_id INT,
-        rented_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        due_date TIMESTAMP,
-        returned_at TIMESTAMP NULL,
-        status ENUM('active', 'returned') DEFAULT 'active',
-        FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-      )
-    `);
-
- // Update the queue table to track when the book becomes available for each user
-await connection.execute(`
-  CREATE TABLE IF NOT EXISTS queue (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    book_id INT,
-    user_id INT,
-    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    available_at TIMESTAMP NULL, -- When the book becomes available for this user
-    expires_at TIMESTAMP NULL, -- When the reservation expires (2 days after available_at)
-    status ENUM('waiting', 'available', 'expired') DEFAULT 'waiting',
-    FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-  )
-`);
-
-    // Create documents directory if it doesn't exist
-   if (!fs.existsSync('documents')) fs.mkdirSync('documents', { recursive: true });
-if (!fs.existsSync('covers')) fs.mkdirSync('covers', { recursive: true });
-
-
+    // Just verify we can connect and tables exist by running a simple query
+    await connection.execute('SELECT 1 FROM users LIMIT 1');
+    await connection.execute('SELECT 1 FROM books LIMIT 1');
+    await connection.execute('SELECT 1 FROM rentals LIMIT 1');
+    await connection.execute('SELECT 1 FROM queue LIMIT 1');
+    
     connection.release();
-    console.log('Database initialized successfully');
+    console.log('Database tables verified successfully');
   } catch (error) {
-    console.error('Database initialization error:', error);
+    console.error('Database verification failed - tables may not exist:', error);
+    // Here you could choose to create tables or exit
+    process.exit(1);
   }
 }
-
 // JWT middleware
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -145,6 +91,7 @@ function authenticateToken(req, res, next) {
     next();
   });
 }
+
 
 // Helper function to process queue when book is returned
 // Update the processQueue function to handle the LIMIT parameter correctly
@@ -475,7 +422,26 @@ app.get('/api/user/rentals', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch rentals: ' + error.message });
   }
 });
+app.post('/api/books/upload', upload.single('document'), async (req, res) => {
+    try {
+        const { title, author, description, total_copies } = req.body;
+        const file = req.file;
 
+        if (!file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        // Validate file path was created
+        if (!file.path) {
+            return res.status(500).json({ error: 'File storage failed' });
+        }
+
+        // ... rest of your code
+    } catch (error) {
+        console.error('Upload book error:', error);
+        res.status(500).json({ error: 'Failed to upload book' });
+    }
+});
 // Get user queue
 app.get('/api/user/queue', authenticateToken, async (req, res) => {
   const userId = req.user.id;

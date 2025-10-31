@@ -42,7 +42,21 @@
             padding: 10px;
             transition: background-color 0.3s ease;
         }
-        
+        /* Offline disabled state */
+.el-button.is-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.offline-warning {
+    color: #f56c6c;
+    font-size: 12px;
+    text-align: center;
+    padding: 5px;
+    background: #fef0f0;
+    border-radius: 4px;
+    margin: 5px 0;
+}
         .pages-container {
             width: 100%;
             height: 100%;
@@ -1051,9 +1065,315 @@
     border: 2px solid #388e3c !important;
     font-weight: bold;
 }
+/* ===== CRITICAL FALLBACK STYLES ===== */
+/* These ensure the book structure works even when JS fails */
+
+/* Base fallback styles that work without Vue/Element UI */
+#app:not(.vue-loaded) {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Ensure book structure is visible even if Vue fails to load */
+.book {
+    min-height: 600px;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* Fallback for when Element UI buttons don't load */
+.control-group .el-button:not([class*="el-icon"])::before {
+    content: "";
+    margin-right: 5px;
+}
+
+.el-button[icon="el-icon-back"]:not(.el-button)::before { content: "←"; }
+.el-button[icon="el-icon-arrow-left"]:not(.el-button)::before { content: "◀"; }
+.el-button[icon="el-icon-arrow-right"]:not(.el-button)::before { content: "▶"; }
+.el-button[icon="el-icon-zoom-out"]:not(.el-button)::before { content: "🔍-"; }
+.el-button[icon="el-icon-zoom-in"]:not(.el-button)::before { content: "🔍+"; }
+.el-button[icon="el-icon-switch-button"]:not(.el-button)::before { content: "🚪"; }
+
+/* Fallback form styles when Element UI fails */
+.el-form:not(.el-form) {
+    display: block;
+    width: 100%;
+}
+
+.el-input:not(.el-input) {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.el-button:not(.el-button) {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #409eff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.el-button:not(.el-button):hover {
+    background: #66b1ff;
+}
+
+/* Fallback for dialog when Element UI fails */
+.el-dialog__wrapper:not(.el-dialog__wrapper) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.el-dialog:not(.el-dialog) {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    min-width: 300px;
+    max-width: 90vw;
+}
+
+/* Loading and error states */
+.loading-fallback {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.error-fallback {
+    background: #fef0f0;
+    color: #f56c6c;
+    padding: 20px;
+    border-radius: 4px;
+    text-align: center;
+    margin: 20px;
+}
+
+/* Offline detection banner */
+.offline-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #ff9800;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    z-index: 10000;
+    font-size: 14px;
+}
+
+/* Ensure content is always visible */
+.reader-content,
+.library-container,
+.dashboard-container,
+.login-container {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Fallback for Vue conditional rendering */
+[v-if]:not(.vue-rendered) {
+    display: block !important;
+}
+
+/* Make sure book pages are always properly structured */
+.pages-container {
+    min-height: 400px;
+}
+
+.page {
+    min-height: 300px;
+}
+
+/* Fallback navigation */
+.nav-tabs:not(.vue-rendered) {
+    display: flex;
+}
+
+.nav-tab:not(.vue-rendered) {
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+/* Book list fallback */
+.book-list:not(.vue-rendered) {
+    display: block;
+}
+
+.book-item:not(.vue-rendered) {
+    display: flex;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+/* ===== DIALOG FALLBACK STYLES FOR OFFLINE MODE ===== */
+
+/* Fix for broken dialogs when Element UI fails to load */
+.el-dialog__wrapper[style*="display: none"] {
+    display: none !important;
+}
+
+.el-dialog__wrapper:not([style]) {
+    display: none;
+}
+
+/* When Element UI fails, provide basic dialog styling */
+.el-dialog:not(.el-dialog) {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    background: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+    z-index: 2001 !important;
+    min-width: 300px !important;
+    max-width: 90vw !important;
+    padding: 20px !important;
+}
+
+.el-dialog__header:not(.el-dialog__header) {
+    padding: 0 0 15px 0 !important;
+    margin: 0 !important;
+    border-bottom: 1px solid #e4e7ed !important;
+    font-weight: bold !important;
+    font-size: 18px !important;
+}
+
+.el-dialog__body:not(.el-dialog__body) {
+    padding: 15px 0 !important;
+    margin: 0 !important;
+}
+
+.el-dialog__footer:not(.el-dialog__footer) {
+    padding: 15px 0 0 0 !important;
+    margin: 0 !important;
+    border-top: 1px solid #e4e7ed !important;
+    text-align: right !important;
+}
+
+/* Backdrop for dialogs */
+.v-modal:not(.v-modal) {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0,0,0,0.5) !important;
+    z-index: 2000 !important;
+}
+
+/* Fix for radio buttons in settings dialog */
+.el-radio-group:not(.el-radio-group) {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+}
+
+.el-radio:not(.el-radio) {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+}
+
+/* Form fallbacks */
+.el-form-item:not(.el-form-item) {
+    margin-bottom: 15px !important;
+}
+
+.el-form-item__label:not(.el-form-item__label) {
+    display: block !important;
+    margin-bottom: 5px !important;
+    font-weight: bold !important;
+}
+
+/* Input number fallback */
+.el-input-number:not(.el-input-number) {
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+}
+
+.el-input-number__decrease:not(.el-input-number__decrease),
+.el-input-number__increase:not(.el-input-number__increase) {
+    padding: 5px 10px !important;
+    background: #f5f7fa !important;
+    border: 1px solid #dcdfe6 !important;
+    cursor: pointer !important;
+}
+
+.el-input-number__decrease:not(.el-input-number__decrease):hover,
+.el-input-number__increase:not(.el-input-number__increase):hover {
+    background: #e4e7ed !important;
+}
 </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+<div id="initial-loading" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column; gap: 20px;">
+    <div style="font-size: 24px; color: #8B4513;">📚 BeteBrana</div>
+    <div style="display: flex; gap: 10px;">
+        <div style="width: 12px; height: 12px; background: #8B4513; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both;"></div>
+        <div style="width: 12px; height: 12px; background: #8B4513; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; animation-delay: 0.16s;"></div>
+        <div style="width: 12px; height: 12px; background: #8B4513; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; animation-delay: 0.32s;"></div>
+    </div>
+    <div style="color: #666; font-size: 14px;">Loading your digital library...</div>
+</div>
+
+<style>
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+/* Add this to your CSS - Force hide all dialogs when offline */
+body.offline .el-dialog,
+body.offline .el-dialog__wrapper,
+body.offline .v-modal {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+</style>
+
+<script>
+// Hide loading screen when app is ready
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        const loading = document.getElementById('initial-loading');
+        if (loading) {
+            loading.style.display = 'none';
+        }
+    }, 1000);
+});
+
+// Also hide if Vue initializes
+document.addEventListener('vue-ready', function() {
+    const loading = document.getElementById('initial-loading');
+    if (loading) {
+        loading.style.display = 'none';
+    }
+});
+</script>
     <div id="app" class="book" :class="`theme-${theme}`">
         <!-- Reader View (takes over the whole book) -->
         <div v-if="isAuthenticated && currentBook" class="reader-container" :class="`theme-${theme}`">
@@ -1130,15 +1450,17 @@
                         <div class="mobile-nav-tabs">
                             <div class="mobile-nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">Rented</div>
                             <div class="mobile-nav-tab" :class="{ active: currentTab === 'queue' }" @click="currentTab = 'queue'">Queue</div>
-                            
+                                <div class="mobile-nav-tab" :class="{ active: currentTab === 'downloaded' }" @click="currentTab = 'downloaded'">Downloaded</div>
 
                         </div>
                     </div>
                     
                     <div class="nav-tabs">
-                        <div class="nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">Rented Books</div>
-                        <div class="nav-tab" :class="{ active: currentTab === 'queue' }" @click="currentTab = 'queue'">Your Queue</div>
-                                                                    <el-button icon="el-icon-s-operation" circle @click="showSettings" size="small" style="margin-left: 220px; padding-left: 10px; margin-bottom:5px; width:40px; height:40px"></el-button>
+                        <div class="nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">Borrowed</div>
+                        <div class="nav-tab" :class="{ active: currentTab === 'queue' }" @click="currentTab = 'queue'">Queue</div>
+                             <div class="nav-tab" :class="{ active: currentTab === 'downloaded' }" @click="currentTab = 'downloaded'" >Downloaded</div>
+    <el-button icon="el-icon-s-operation" circle @click="showSettings" size="small" style="margin-left: 220px; padding-left: 10px; margin-bottom:5px; width:40px; height:40px"></el-button>                                          
+                        <el-button icon="el-icon-s-operation" circle @click="showSettings" size="small" style="margin-left: 220px; padding-left: 10px; margin-bottom:5px; width:40px; height:40px"></el-button>
 
                         <el-button icon="el-icon-switch-button" circle @click="logout" size="small" style=" margin-bottom:5px; width:40px; height:40px"></el-button>
 
@@ -1161,7 +1483,7 @@
                                         <span v-else>📁</span>
                                     </div>
                                 </div>
-                                <div class="book-info">
+                                <div class="book-info" id="offlinebook">
                                     <h3>{{ rental.title }}</h3>
                                     <p>{{ rental.author || 'Unknown Author' }}</p>
                                     <div class="rental-status" :class="getRentalStatusClass(rental)">
@@ -1171,11 +1493,33 @@
                                         {{ getTimeRemaining(rental) }}
                                     </div>
                                 </div>
-                                <div class="rental-actions">
-                                    <el-button type="primary" size="mini" @click.stop="openRentedBook(rental)">Read</el-button>
-                                    <el-button type="warning" size="mini" @click.stop="returnBook(rental)">Return</el-button>
-                                </div>
-                            </div>
+                          <div class="rental-actions">
+    <el-button 
+        type="primary" 
+        size="mini" 
+        @click.stop="openRentedBook(rental)"
+        :disabled="offlineMode"
+        :title="offlineMode ? 'You are offline' : 'Read book'">
+        Read
+    </el-button>
+    <el-button 
+        type="success" 
+        size="mini" 
+        @click.stop="downloadRentedBook(rental)" 
+        :disabled="offlineMode"
+        :title="offlineMode ? 'You are offline' : 'Download for offline reading'">
+        Download
+    </el-button>
+    <el-button 
+        type="warning" 
+        size="mini" 
+        @click.stop="returnBook(rental)"
+        :disabled="offlineMode"
+        :title="offlineMode ? 'You are offline' : 'Return book'">
+        Return
+    </el-button>
+</div>
+</div>
                         </div>
                     </div>
                     
@@ -1196,7 +1540,7 @@
                                         <span v-else>📁</span>
                                     </div>
                                 </div>
-                                <div class="book-info">
+                                <div class="book-info" id="offlinebook">
                                     <h3>{{ item.title }}</h3>
                                     <p>{{ item.author || 'Unknown Author' }}</p>
                                     <p>Added: {{ formatDate(item.added_at) }}</p>
@@ -1211,9 +1555,47 @@
                             </div>
                         </div>
                     </div>
+                      <!-- Downloaded Files Section -->
+<div v-if="currentTab === 'downloaded'" class="dashboard-section">
+    <h3 class="dashboard-subtitle">Downloaded Files</h3>
+    <div v-if="downloadedBooks.length === 0" class="empty-library">
+        <p>No downloaded books available offline</p>
+      
+    </div>
+    <div v-else class="book-list">
+        <div v-for="book in downloadedBooks" :key="book.id" class="book-item" @click="openDownloadedBook(book)">
+            <div class="book-cover">
+                <img v-if="book.cover_image" :src="book.cover_image" :alt="book.title">
+                <div v-else class="placeholder">
+                    <span v-if="book.file_type === 'pdf'">📄</span>
+                    <span v-else-if="book.file_type === 'docx' || book.file_type === 'doc'">📝</span>
+                    <span v-else-if="book.file_type === 'txt'">📃</span>
+                    <span v-else>📁</span>
                 </div>
             </div>
-            
+            <div class="book-info">
+                <h3>{{ book.title }}</h3>
+                <p>{{ book.author || 'Unknown Author' }}</p>
+                <div class="availability-info">
+                    <span class="availability-status status-available">
+                        Available Offline
+                    </span>
+                    <div class="countdown-timer" :class="getDownloadCountdownClass(book)">
+                        Expires: {{ getDownloadTimeRemaining(book) }}
+                    </div>
+                </div>
+                <span class="file-type">{{ book.file_type ? book.file_type.toUpperCase() : 'UNKNOWN' }}</span>
+            </div>
+            <div class="rental-actions">
+                <el-button type="primary" size="mini" @click.stop="openDownloadedBook(book)">Read</el-button>
+                <el-button type="danger" size="mini" @click.stop="removeDownloadedBook(book)">Remove</el-button>
+            </div>
+        </div>
+    </div>
+</div>
+                </div>
+            </div>
+          
             <!-- Right Page: Login or Library -->
             <div class="right-page page" :class="`theme-${theme}`">
                 <div class="bookmark"></div>
@@ -1264,7 +1646,7 @@
             <span v-else>📁</span>
         </div>
     </div>
-<div class="book-info">
+<div class="book-info" id="offlinebook">
     <h3>{{ book.title }}</h3>
     <p>{{ book.author || 'Unknown Author' }}</p>
     
@@ -1339,7 +1721,7 @@
         </div>
 
         <!-- Register Dialog -->
-        <el-dialog title="Register" :visible.sync="showRegister" width="400px" :class="`theme-${theme}`">
+        <el-dialog id="offlinetoremove" title="Register" :visible.sync="showRegister" width="400px" :class="`theme-${theme}`">
             <el-form :model="registerForm" :rules="registerRules" ref="registerForm">
                 <el-form-item label="Name" prop="name">
                     <el-input v-model="registerForm.name"></el-input>
@@ -1375,7 +1757,7 @@
         </el-dialog>
         
         <!-- Settings Dialog -->
-        <el-dialog title="Reading Settings" :visible.sync="settingsVisible"    width="400px" :class="`theme-${theme}`">
+        <el-dialog id="offlinetoremove" title="Reading Settings" :visible.sync="settingsVisible"    width="400px" :class="`theme-${theme}`">
             <el-form label-width="100px">
                 <el-form-item label="Theme">
                     <el-radio-group v-model="theme" @change="applyTheme" class="theme-selector">
@@ -1426,105 +1808,273 @@
 
         // API Configuration
         const API_BASE = 'http://localhost:3000/api';
+// Encryption Utilities
+class SecureStorage {
+    constructor() {
+        this.dbName = 'BeteBranaSecureDB';
+        this.dbVersion = 1;
+        this.db = null;
+    }
 
-        new Vue({
-            el: '#app',
-            data() {
-                return {
-                    // Authentication
-                    isAuthenticated: false,
-                    token: null,
-                    user: null,
-                    loginForm: {
-                        email: '',
-                        password: ''
-                    },
-                    loginRules: {
-                        email: [
-                            { required: true, message: 'Please enter email', trigger: 'blur' },
-                            { type: 'email', message: 'Please enter a valid email', trigger: 'blur' }
-                        ],
-                        password: [
-                            { required: true, message: 'Please enter password', trigger: 'blur' }
-                        ]
-                    },
-                    registerForm: {
-                        name: '',
-                        email: '',
-                        password: ''
-                    },
-                    registerRules: {
-                        name: [
-                            { required: true, message: 'Please enter name', trigger: 'blur' }
-                        ],
-                        email: [
-                            { required: true, message: 'Please enter email', trigger: 'blur' },
-                            { type: 'email', message: 'Please enter a valid email', trigger: 'blur' }
-                        ],
-                        password: [
-                            { required: true, message: 'Please enter password', trigger: 'blur' },
-                            { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' }
-                        ]
-                    },
-                    showRegister: false,
-                    loginLoading: false,
-                    registerLoading: false,
-                    loginError: '',
-                    
-                    // Navigation
-                    currentView: 'library',
-                    currentTab: 'rentals', // Default to rentals on mobile
-                    
-                    // Reader state
-                    currentBook: null,
-                    bookList: [],
-                    userRentals: [],
-                    userQueue: [],
-                    isReady: false,
-                    loadError: null,
-                    progress: 0,
-                    searchVisible: false,
-                    searchText: '',
-                    searchResults: [],
-                    settingsVisible: false,
-                    theme: 'light',
-                    fontSize: 16,
-                    zoomLevel: 1.0,
-                    
-                    // EPUB
-                    rendition: null,
-                    book: null,
-                    
-                    // PDF
-                    pdfDoc: null,
-                    pdfPages: [],
-                    
-                    // DOCX/DOC
-                    docxContent: '',
-                    
-                    // TXT
-                    txtContent: '',
-                    
-                    // Timer for countdown updates
-                    countdownTimer: null,
-                    queueTimer: null,
-                };
-            },
+    async init() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.dbName, this.dbVersion);
             
-            computed: {
-                filteredBooks() {
-                    if (this.currentTab === 'available') {
-                        return this.bookList.filter(book => book.available_copies > 0);
-                    }
-                    return this.bookList;
-                },
-                
-                // Check if we're on mobile
-                isMobile() {
-                    return window.innerWidth <= 900;
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => {
+                this.db = request.result;
+                resolve(this.db);
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains('encryptedBooks')) {
+                    const store = db.createObjectStore('encryptedBooks', { keyPath: 'id' });
+                    store.createIndex('expiry', 'expiry', { unique: false });
                 }
+            };
+        });
+    }
+
+    async generateKey() {
+        const deviceId = await this.getDeviceId();
+        const encoder = new TextEncoder();
+        const data = encoder.encode(deviceId + 'BeteBranaSecret2024');
+        const hash = await crypto.subtle.digest('SHA-256', data);
+        return crypto.subtle.importKey(
+            'raw',
+            hash,
+            { name: 'AES-GCM' },
+            false,
+            ['encrypt', 'decrypt']
+        );
+    }
+
+    async getDeviceId() {
+        let deviceId = localStorage.getItem('deviceId');
+        if (!deviceId) {
+            deviceId = crypto.randomUUID();
+            localStorage.setItem('deviceId', deviceId);
+        }
+        return deviceId;
+    }
+
+    async encryptData(data) {
+        const key = await this.generateKey();
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const encoder = new TextEncoder();
+        const encodedData = encoder.encode(JSON.stringify(data));
+        
+        const encrypted = await crypto.subtle.encrypt(
+            {
+                name: 'AES-GCM',
+                iv: iv
             },
+            key,
+            encodedData
+        );
+
+        return {
+            iv: Array.from(iv),
+            data: Array.from(new Uint8Array(encrypted)),
+            timestamp: Date.now()
+        };
+    }
+
+    async decryptData(encryptedData) {
+        try {
+            const key = await this.generateKey();
+            const iv = new Uint8Array(encryptedData.iv);
+            const data = new Uint8Array(encryptedData.data);
             
+            const decrypted = await crypto.subtle.decrypt(
+                {
+                    name: 'AES-GCM',
+                    iv: iv
+                },
+                key,
+                data
+            );
+
+            const decoder = new TextDecoder();
+            return JSON.parse(decoder.decode(decrypted));
+        } catch (error) {
+            console.error('Decryption failed:', error);
+            throw new Error('Failed to decrypt book - device mismatch or file corrupted');
+        }
+    }
+
+    async saveBook(bookId, bookData, expiryDate) {
+        if (!this.db) await this.init();
+        
+        const encrypted = await this.encryptData(bookData);
+        const transaction = this.db.transaction(['encryptedBooks'], 'readwrite');
+        const store = transaction.objectStore('encryptedBooks');
+        
+        await store.put({
+            id: bookId,
+            data: encrypted,
+            expiry: expiryDate.getTime(),
+            downloadedAt: new Date().toISOString()
+        });
+    }
+
+    async getBook(bookId) {
+        if (!this.db) await this.init();
+        
+        const transaction = this.db.transaction(['encryptedBooks'], 'readonly');
+        const store = transaction.objectStore('encryptedBooks');
+        
+        return new Promise((resolve, reject) => {
+            const request = store.get(bookId);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async removeBook(bookId) {
+        if (!this.db) await this.init();
+        
+        const transaction = this.db.transaction(['encryptedBooks'], 'readwrite');
+        const store = transaction.objectStore('encryptedBooks');
+        
+        await store.delete(bookId);
+    }
+
+    async getAllBooks() {
+        if (!this.db) await this.init();
+        
+        const transaction = this.db.transaction(['encryptedBooks'], 'readonly');
+        const store = transaction.objectStore('encryptedBooks');
+        
+        return new Promise((resolve, reject) => {
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async cleanupExpired() {
+        const books = await this.getAllBooks();
+        const now = Date.now();
+        
+        for (const book of books) {
+            if (book.expiry < now) {
+                await this.removeBook(book.id);
+            }
+        }
+    }
+}
+
+// Initialize secure storage
+const secureStorage = new SecureStorage();
+      new Vue({
+    el: '#app',
+    data() {
+        return {
+            // Authentication
+            isAuthenticated: false,
+            token: null,
+            user: null,
+            loginForm: {
+                email: '',
+                password: ''
+            },
+            loginRules: {
+                email: [
+                    { required: true, message: 'Please enter email', trigger: 'blur' },
+                    { type: 'email', message: 'Please enter a valid email', trigger: 'blur' }
+                ],
+                password: [
+                    { required: true, message: 'Please enter password', trigger: 'blur' }
+                ]
+            },
+            registerForm: {
+                name: '',
+                email: '',
+                password: ''
+            },
+            registerRules: {
+                name: [
+                    { required: true, message: 'Please enter name', trigger: 'blur' }
+                ],
+                email: [
+                    { required: true, message: 'Please enter email', trigger: 'blur' },
+                    { type: 'email', message: 'Please enter a valid email', trigger: 'blur' }
+                ],
+                password: [
+                    { required: true, message: 'Please enter password', trigger: 'blur' },
+                    { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' }
+                ]
+            },
+            showRegister: false,
+            loginLoading: false,
+            registerLoading: false,
+            loginError: '',
+            
+            // Navigation
+            currentView: 'library',
+            currentTab: 'rentals', // Default to rentals on mobile
+            
+            // Reader state
+            currentBook: null,
+            bookList: [],
+            userRentals: [],
+            userQueue: [],
+            isReady: false,
+            loadError: null,
+            progress: 0,
+            searchVisible: false,
+            searchText: '',
+            searchResults: [],
+            settingsVisible: false,
+            theme: 'light',
+            fontSize: 16,
+            zoomLevel: 1.0,
+            downloadedBooks: [],
+            offlineMode: false,
+            // EPUB
+            rendition: null,
+            book: null,
+            
+            // PDF
+            pdfDoc: null,
+            pdfPages: [],
+            
+            // DOCX/DOC
+            docxContent: '',
+            
+            // TXT
+            txtContent: '',
+            
+            // Timer for countdown updates
+            countdownTimer: null,
+            queueTimer: null,
+        };
+    },
+    
+    computed: {
+        filteredBooks() {
+            if (this.currentTab === 'available') {
+                return this.bookList.filter(book => book.available_copies > 0);
+            }
+            return this.bookList;
+        },
+        
+        // Check if we're on mobile
+        isMobile() {
+            return window.innerWidth <= 900;
+        },
+        
+        // ADD THIS MISSING COMPUTED PROPERTY:
+        queuableBooks() {
+            return this.bookList.filter(book => 
+                book.available_copies <= 0 && 
+                !this.hasRentedBook(book.id) && 
+                !this.hasQueuedBook(book.id)
+            );
+        }
+    },
 async mounted() {
     // Check for existing authentication
     const token = localStorage.getItem('reader-token');
@@ -1541,6 +2091,12 @@ async mounted() {
             this.theme = savedTheme;
         }
         
+        // Initialize secure storage
+        await secureStorage.init();
+        
+        // Load downloaded books
+        await this.loadDownloadedBooks();
+        
         await this.loadLibrary();
         await this.loadUserData();
         this.applyTheme();
@@ -1548,8 +2104,19 @@ async mounted() {
         // Start countdown timer for rentals
         this.startCountdownTimer();
         
-        // Start queue timer updates - FIX: Add this line
+        // Start queue timer updates
         this.startQueueTimer();
+        
+        // Check offline status
+        this.checkOfflineStatus();
+        
+        // Watch for register dialog when offline
+        this.$watch('showRegister', (newVal) => {
+            if (newVal && !navigator.onLine) {
+                this.$message.warning('Registration unavailable while offline');
+                this.showRegister = false;
+            }
+        });
     }
     
     // Set initial tab based on screen size
@@ -1559,28 +2126,40 @@ async mounted() {
     
     // Add resize listener
     window.addEventListener('resize', this.handleResize);
+    
+    // Add online/offline listeners
+    window.addEventListener('online', this.checkOfflineStatus);
+    window.addEventListener('offline', this.checkOfflineStatus);
 },
-       startQueueTimer() {
-    // Update queue timers every second
-    this.queueTimer = setInterval(() => {
-        this.updateQueueTimers();
-    }, 1000);
-},     
-            beforeDestroy() {
-                // Clear timer and event listener
-                if (this.countdownTimer) {
-                    clearInterval(this.countdownTimer);
-                }
-                window.removeEventListener('resize', this.handleResize);
-            },
-            
-            methods: {
-                // Handle window resize
-                handleResize() {
-                    if (this.isMobile && this.currentTab === 'all') {
-                        this.currentTab = 'rentals';
-                    }
-                },
+
+methods: {
+    // Handle window resize
+    handleResize() {
+        if (this.isMobile && this.currentTab === 'all') {
+            this.currentTab = 'rentals';
+        }
+    },
+    
+    startQueueTimer() {
+        // Update queue timers every second
+        this.queueTimer = setInterval(() => {
+            this.updateQueueTimers();
+        }, 1000);
+    },
+    
+    startCountdownTimer() {
+        // Update countdown every minute
+        this.countdownTimer = setInterval(() => {
+            // Force Vue to update the view
+            this.$forceUpdate();
+        }, 60000); // Update every minute
+    },
+    
+    // Check offline status
+    checkOfflineStatus() {
+        this.offlineMode = !navigator.onLine;
+    },
+    
                 
                 // API Helper
                 async apiCall(endpoint, options = {}) {
@@ -1841,13 +2420,7 @@ updateQueueTimers() {
     }
 },
 
-// Call this in mounted to start the timer
-mounted() {
-  // ... existing code ...
-  
-  // Start queue timer updates
-  this.queueTimer = setInterval(this.updateQueueTimers, 1000);
-},
+
 
 // Don't forget to clear the timer
 beforeDestroy() {
@@ -1928,9 +2501,7 @@ getQueueStatusDisplay(book) {
     
     const queueInfo = book.queueInfo;
     
-    // Debug log to see what's happening
-    console.log('Book:', book.title, 'QueueInfo:', queueInfo);
-    
+   
     if (queueInfo.hasReservation && queueInfo.timeRemaining > 0) {
         const timeRemaining = this.formatQueueTimeRemaining(queueInfo.timeRemaining);
         return { 
@@ -2221,7 +2792,365 @@ getQueueDisplay(book) {
                             throw new Error(`Unsupported file type: ${book.type}`);
                     }
                 },
+                // Add to methods section
+// Add this method to your Vue methods
+async downloadRentedBook(rental) {
+    if (!navigator.onLine) {
+        this.$message.warning('Cannot download while offline');
+        return;
+    }
+
+    try {
+        // Find the full book details from bookList
+        const book = this.bookList.find(b => b.id === rental.book_id);
+        
+        if (!book) {
+            throw new Error('Book details not found');
+        }
+        
+        if (!book.file_path) {
+            throw new Error('Book file is not available for download');
+        }
+        
+        this.$message.info(`Downloading "${book.title}" securely...`);
+        
+        const fileUrl = `http://localhost:3000${book.file_path}`;
+        console.log('Download URL:', fileUrl);
+        
+        const response = await fetch(fileUrl, {
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to download book file');
+        
+        const arrayBuffer = await response.arrayBuffer();
+        
+        // Use rental due date for expiry
+        const expiryDate = new Date(rental.due_date);
+        
+        // Prepare book data for encryption
+   const bookData = {
+    id: book.id,
+    title: book.title,
+    author: book.author,
+    file_type: book.file_type, // Explicitly include file_type
+    file_path: book.file_path, // Keep file_path for reference
+    cover_image: book.cover_image,
+    fileContent: Array.from(new Uint8Array(arrayBuffer)),
+    downloadedAt: new Date().toISOString(),
+    expiryDate: expiryDate.toISOString()
+};
+        // Encrypt and save
+        await secureStorage.saveBook(book.id, bookData, expiryDate);
+        
+        // Update downloaded books list
+        await this.loadDownloadedBooks();
+        
+        this.$message.success(`"${book.title}" downloaded securely for offline reading`);
+        
+    } catch (error) {
+        console.error('Download error:', error);
+        this.$message.error(`Download failed: ${error.message}`);
+    }
+},
+// Download book for offline reading
+async downloadBook(item) {
+    if (!navigator.onLine) {
+        this.$message.warning('Cannot download while offline');
+        return;
+    }
+
+    try {
+        let book, expiryDate;
+        
+        // Check if it's a rental (has book_id) or a book object
+        if (item.book_id) {
+            // It's a rental - find the book and use rental due date
+            book = this.bookList.find(b => b.id === item.book_id);
+            expiryDate = new Date(item.due_date);
+        } else {
+            // It's a book object - use it directly
+            book = item;
+            expiryDate = new Date(Date.now() + 21 * 24 * 60 * 60 * 1000);
+        }
+        
+        if (!book) {
+            throw new Error('Book details not found');
+        }
+        
+        if (!book.file_path) {
+            throw new Error('Book file is not available for download');
+        }
+        
+        this.$message.info(`Downloading "${book.title}" securely...`);
+        
+        const fileUrl = `http://localhost:3000${book.file_path}`;
+        console.log('Download URL:', fileUrl);
+        alert("book downloaded");
+        
+        const response = await fetch(fileUrl, {
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to download book file');
+        
+        const arrayBuffer = await response.arrayBuffer();
+        
+      const bookData = {
+    ...book,
+    file_type: book.file_type, // Ensure file_type is explicitly included
+    fileContent: Array.from(new Uint8Array(arrayBuffer)),
+    downloadedAt: new Date().toISOString(),
+    expiryDate: expiryDate.toISOString()
+};
+        
+        // Encrypt and save
+        await secureStorage.saveBook(book.id, bookData, expiryDate);
+        
+        // Update downloaded books list
+        await this.loadDownloadedBooks();
+        
+        this.$message.success(`"${book.title}" downloaded securely for offline reading`);
+        
+    } catch (error) {
+        console.error('Download error:', error);
+        this.$message.error(`Download failed: ${error.message}`);
+    }
+},
+
+// Load downloaded books from secure storage
+async loadDownloadedBooks() {
+    try {
+        await secureStorage.cleanupExpired();
+        const encryptedBooks = await secureStorage.getAllBooks();
+        this.downloadedBooks = [];
+        
+        for (const encryptedBook of encryptedBooks) {
+            try {
+                const decryptedData = await secureStorage.decryptData(encryptedBook.data);
                 
+                // Use the decrypted data directly
+                this.downloadedBooks.push({
+                    ...decryptedData, // This contains the book data with file_type, fileContent, etc.
+                    encryptedId: encryptedBook.id,
+                    expiry: encryptedBook.expiry,
+                    // Ensure file_type is preserved
+                    file_type: decryptedData.file_type || this.determineFileType(decryptedData)
+                });
+                
+            } catch (error) {
+                console.error('Failed to decrypt book:', error);
+                // Remove corrupted book
+                await secureStorage.removeBook(encryptedBook.id);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading downloaded books:', error);
+    }
+},
+// Helper method to determine file type from various sources
+determineFileType(book) {
+    // Priority 1: Direct file_type property
+    if (book.file_type) return book.file_type;
+    
+    // Priority 2: From file_path extension
+    if (book.file_path) {
+        const extension = book.file_path.split('.').pop().toLowerCase();
+        if (['pdf', 'docx', 'doc', 'txt', 'epub'].includes(extension)) {
+            return extension;
+        }
+    }
+    
+    // Priority 3: From type property
+    if (book.type) return book.type;
+    
+    // Priority 4: From original file_type if available
+    if (book.original_file_type) return book.original_file_type;
+    
+    // Default fallback
+    return 'unknown';
+},
+
+// Open downloaded book
+async openDownloadedBook(book) {
+    try {
+        console.log('Opening downloaded book:', book);
+        
+        // Ensure the book has a valid file_type using our helper method
+        const fileType = this.determineFileType(book);
+        
+        if (!fileType || fileType === 'unknown') {
+            throw new Error('Cannot determine file type for downloaded book');
+        }
+
+        this.currentBook = {
+            ...book,
+            type: fileType,
+            file_type: fileType, // Ensure both type and file_type are set
+            offline: true
+        };
+        
+        this.isReady = false;
+        this.loadError = null;
+        
+        // For downloaded books, we already have the file content
+        await this.loadDownloadedDocument(book);
+        this.isReady = true;
+        
+    } catch (error) {
+        console.error('Error opening downloaded book:', error);
+        this.loadError = `Failed to open book: ${error.message}`;
+        this.$message.error(`Error opening book: ${error.message}`);
+    }
+},
+// Load document from downloaded content
+async loadDownloadedDocument(book) {
+    try {
+        console.log('Loading downloaded document:', book);
+        
+        if (!book.fileContent || !book.fileContent.length) {
+            throw new Error('No file content found in downloaded book');
+        }
+
+        const arrayBuffer = new Uint8Array(book.fileContent).buffer;
+        
+        // Use the helper method to ensure we have a valid file type
+        const fileType = this.determineFileType(book);
+        
+        if (!fileType || fileType === 'unknown') {
+            throw new Error('File type is undefined or unknown for downloaded book');
+        }
+
+        switch(fileType.toLowerCase()) {
+            case 'pdf':
+                await this.loadPDFFromBuffer(arrayBuffer);
+                break;
+            case 'docx':
+            case 'doc':
+                await this.loadDOCXFromBuffer(arrayBuffer);
+                break;
+            case 'txt':
+                await this.loadTXTFromBuffer(arrayBuffer);
+                break;
+            case 'epub':
+                await this.loadEPUBFromBuffer(arrayBuffer);
+                break;
+            default:
+                throw new Error(`Unsupported file type: ${fileType}`);
+        }
+    } catch (error) {
+        console.error('Error loading downloaded document:', error);
+        throw error;
+    }
+},
+// PDF from buffer
+async loadPDFFromBuffer(arrayBuffer) {
+    this.pdfDoc = await pdfjsLib.getDocument(arrayBuffer).promise;
+    this.pdfPages = [];
+    
+    for (let i = 1; i <= this.pdfDoc.numPages; i++) {
+        this.pdfPages.push({ pageNumber: i });
+    }
+    
+    await this.renderPDFPages();
+},
+
+// DOCX from buffer
+async loadDOCXFromBuffer(arrayBuffer) {
+    if (typeof mammoth === 'undefined') {
+        throw new Error('DOCX library not loaded');
+    }
+    
+    const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+    
+    if (result.value) {
+        this.docxContent = result.value;
+    } else {
+        throw new Error('No content could be extracted from the document');
+    }
+},
+
+// TXT from buffer
+async loadTXTFromBuffer(arrayBuffer) {
+    const decoder = new TextDecoder();
+    this.txtContent = decoder.decode(arrayBuffer);
+    
+    if (!this.txtContent.trim()) {
+        throw new Error('File appears to be empty');
+    }
+},
+
+// EPUB from buffer
+async loadEPUBFromBuffer(arrayBuffer) {
+    this.book = ePub(arrayBuffer);
+    
+    this.rendition = this.book.renderTo("epub-container", {
+        width: "100%",
+        height: "100%"
+    });
+    
+    this.rendition.display();
+    
+    this.rendition.on("relocated", (location) => {
+        this.updateProgress();
+    });
+},
+
+// Remove downloaded book
+async removeDownloadedBook(book) {
+    try {
+        await secureStorage.removeBook(book.id);
+        await this.loadDownloadedBooks();
+        this.$message.success('Book removed from downloads');
+    } catch (error) {
+        console.error('Error removing downloaded book:', error);
+        this.$message.error('Failed to remove book');
+    }
+},
+
+// Download countdown methods
+getDownloadTimeRemaining(book) {
+    const expiryDate = new Date(book.expiry);
+    const now = new Date();
+    const diff = expiryDate - now;
+    
+    if (diff <= 0) {
+        return 'Expired';
+    }
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    
+    if (days > 0) {
+        return `${days}d ${hours}h`;
+    } else {
+        return `${hours}h`;
+    }
+},
+
+getDownloadCountdownClass(book) {
+    const expiryDate = new Date(book.expiry);
+    const now = new Date();
+    const diff = expiryDate - now;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (diff <= 0) {
+        return 'countdown-overdue';
+    } else if (days <= 1) {
+        return 'countdown-due';
+    } else {
+        return 'countdown-normal';
+    }
+},
+
+// Check offline status
+checkOfflineStatus() {
+    this.offlineMode = !navigator.onLine;
+},
                 // EPUB Loader
                 async loadEPUB(url) {
                     try {
@@ -2497,10 +3426,14 @@ getQueueDisplay(book) {
                     this.searchVisible = false;
                 },
                 
-                showSettings() {
-                    this.settingsVisible = true;
-                    
-                },
+showSettings() {
+    if (!navigator.onLine) {
+        this.$message.warning('Settings unavailable while offline');
+        return;
+    }
+    this.settingsVisible = true;
+},
+
                 
                 updateProgress() {
                     if (this.rendition && this.book) {
@@ -2540,6 +3473,96 @@ getQueueDisplay(book) {
                 }
             }
         });
+        // Enhanced offline detection
+function handleOfflineMode() {
+    const isOffline = !navigator.onLine;
+    
+    // Update Vue instance offline status
+    if (window.vueInstance) {
+        window.vueInstance.offlineMode = isOffline;
+    }
+    
+    if (isOffline) {
+        // Hide all online-only dialogs
+        const wrappers = document.querySelectorAll('.el-dialog__wrapper, .v-modal');
+        wrappers.forEach(wrapper => {
+            wrapper.style.display = 'none';
+            wrapper.style.visibility = 'hidden';
+            wrapper.style.opacity = '0';
+            wrapper.style.zIndex = '-1000';
+        });
+        
+        const dialogs = document.querySelectorAll("#offlinetoremove");
+        dialogs.forEach(dialog => {
+            dialog.style.display = 'none';
+            dialog.style.visibility = 'hidden';
+            dialog.style.opacity = '0';
+        });
+        
+        // Show offline warning for online-only buttons
+        const onlineButtons = document.querySelectorAll('.el-button[disabled]');
+        onlineButtons.forEach(button => {
+            if (!button.querySelector('.offline-warning')) {
+                const warning = document.createElement('div');
+                warning.className = 'offline-warning';
+                warning.textContent = 'You are offline';
+                button.parentNode.insertBefore(warning, button.nextSibling);
+            }
+        });
+    } else {
+        // Remove offline warnings when online
+        const warnings = document.querySelectorAll('.offline-warning');
+        warnings.forEach(warning => warning.remove());
+    }
+}
+
+
+
+// Check offline status every second and on events
+setInterval(handleOfflineMode, 1000);
+window.addEventListener('online', handleOfflineMode);
+window.addEventListener('offline', handleOfflineMode);
+handleOfflineMode();
+// Force hide ALL Element UI dialogs when offline
+function hideDialogsWhenOffline() {
+    if (!navigator.onLine) {
+        // Hide all dialog wrappers and backdrops
+        const wrappers = document.querySelectorAll('.el-dialog__wrapper, .v-modal');
+        wrappers.forEach(wrapper => {
+            wrapper.style.display = 'none';
+            wrapper.style.visibility = 'hidden';
+            wrapper.style.opacity = '0';
+            wrapper.style.zIndex = '-1000';
+        });
+        
+        // Also hide the actual dialogs
+        const dialogs = document.querySelectorAll("#offlinetoremove");
+        dialogs.forEach(dialog => {
+            dialog.style.display = 'none';
+            dialog.style.visibility = 'hidden';
+            dialog.style.opacity = '0';
+        });
+        const BUTTOMS = document.querySelectorAll("buttons");
+
+        const books =document.querySelectorAll(".offlinebutton");
+        books.forEach(book=>{
+            book.style.opacity='0.1';
+            book.style.addEventListener("click",()=>{
+                alert("the book is not available offline");
+            })
+        });
+    }
+}
+
+// Check every 100ms and hide dialogs when offline
+setInterval(hideDialogsWhenOffline, 100);
+
+// Also run immediately
+hideDialogsWhenOffline();
+
+// Listen for online/offline events
+window.addEventListener('online', hideDialogsWhenOffline);
+window.addEventListener('offline', hideDialogsWhenOffline);
     </script>
 </body>
 </html>
