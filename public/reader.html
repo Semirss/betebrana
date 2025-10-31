@@ -1167,7 +1167,79 @@
     text-align: center;
     margin: 20px;
 }
+/* Add to your existing CSS */
+/* Fallback button styles when Element UI fails */
+.el-button:not(.el-button) {
+    display: inline-block;
+    padding: 8px 15px;
+    background: #409eff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 14px;
+    margin: 2px;
+    min-width: 40px;
+    min-height: 40px;
+}
 
+.el-button.is-circle:not(.el-button) {
+    border-radius: 50%;
+    padding: 8px;
+}
+
+.el-button.is-disabled:not(.el-button) {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #c0c4cc;
+}
+
+/* Fallback for button icons when Element UI fails */
+.el-button[icon]:not(.el-button)::before {
+    content: "";
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.el-button[icon="el-icon-back"]:not(.el-button)::before { content: "←"; }
+.el-button[icon="el-icon-arrow-left"]:not(.el-button)::before { content: "◀"; }
+.el-button[icon="el-icon-arrow-right"]:not(.el-button)::before { content: "▶"; }
+.el-button[icon="el-icon-zoom-out"]:not(.el-button)::before { content: "−"; }
+.el-button[icon="el-icon-zoom-in"]:not(.el-button)::before { content: "+"; }
+.el-button[icon="el-icon-switch-button"]:not(.el-button)::before { content: "⏻"; }
+
+/* Ensure reader header buttons are always visible */
+.reader-header .control-group {
+    display: flex !important;
+    gap: 8px;
+}
+
+.reader-header .el-button {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: flex !important;
+}
+
+/* Force show essential reader controls even when offline */
+.reader-header .control-group .el-button:not(.el-button) {
+    background: #8B4513 !important;
+    border: 1px solid #654321 !important;
+}
+
+/* Specific styling for reader controls */
+.reader-controls {
+    display: flex !important;
+    gap: 5px;
+}
+
+/* Ensure buttons don't disappear in offline mode */
+body.offline .reader-header .el-button,
+body.offline .reader-footer .el-button {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
 /* Offline detection banner */
 .offline-banner {
     position: fixed;
@@ -1797,11 +1869,17 @@ document.addEventListener('vue-ready', function() {
 
     <!-- Libraries -->
     <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
-    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <!-- <script src="https://unpkg.com/element-ui/lib/index.js"></script> -->
     <script src="https://unpkg.com/epubjs/dist/epub.min.js"></script>
     <script src="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js"></script>
     <script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
-    
+<!-- Change from: -->
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<!-- To: -->
+<link rel="stylesheet" href="/node_modules/element-ui/lib/theme-chalk/index.css">
+<script src="/node_modules/element-ui/lib/index.js"></script>
     <script>
         // Set PDF.js worker path
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
@@ -2888,7 +2966,7 @@ async downloadBook(item) {
         
         const fileUrl = `http://localhost:3000${book.file_path}`;
         console.log('Download URL:', fileUrl);
-        alert("book downloaded");
+      
         
         const response = await fetch(fileUrl, {
             headers: {
@@ -3499,20 +3577,6 @@ function handleOfflineMode() {
             dialog.style.opacity = '0';
         });
         
-        // Show offline warning for online-only buttons
-        const onlineButtons = document.querySelectorAll('.el-button[disabled]');
-        onlineButtons.forEach(button => {
-            if (!button.querySelector('.offline-warning')) {
-                const warning = document.createElement('div');
-                warning.className = 'offline-warning';
-                warning.textContent = 'You are offline';
-                button.parentNode.insertBefore(warning, button.nextSibling);
-            }
-        });
-    } else {
-        // Remove offline warnings when online
-        const warnings = document.querySelectorAll('.offline-warning');
-        warnings.forEach(warning => warning.remove());
     }
 }
 

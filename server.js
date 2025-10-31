@@ -800,7 +800,8 @@ app.get('/api/books/:id/queue-info', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to get queue info' });
   }
 });
-
+app.use('/node_modules', express.static('node_modules'));
+app.use(express.static('.')); // Serve current directory
 // Start server
 async function startServer() {
   await initializeDatabase();
