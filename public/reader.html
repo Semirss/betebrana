@@ -1398,6 +1398,242 @@ body.offline .reader-footer .el-button {
 .el-input-number__increase:not(.el-input-number__increase):hover {
     background: #e4e7ed !important;
 }
+/* Navigation Mode Styles */
+.navigation-mode {
+    overflow: hidden !important;
+}
+
+.navigation-mode .reader-content {
+    overflow: hidden !important;
+    position: relative;
+}
+
+.page-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.page-navigation .el-button {
+    min-width: 100px;
+}
+
+.page-info {
+    font-size: 14px;
+    color: #666;
+    margin: 0 15px;
+}
+
+/* PDF Navigation Mode */
+.pdf-navigation-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    overflow: hidden;
+}
+
+.pdf-navigation-view {
+    flex: 1;
+    overflow-y: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pdf-navigation-view .pdf-page {
+    margin: 10px auto;
+    display: block;
+}
+
+/* EPUB Navigation Mode */
+.epub-navigation-container {
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+/* DOCX/TXT Navigation Mode */
+.content-navigation-container {
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.content-navigation-view {
+    height: calc(100% - 60px);
+    overflow-y: auto;
+}
+
+.navigation-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+/* Navigation toggle button */
+.navigation-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 100;
+}
+
+/* Theme support for navigation controls */
+.theme-dark .navigation-controls {
+    background: rgba(45, 45, 45, 0.9);
+    color: #e0e0e0;
+}
+
+.theme-tan .navigation-controls {
+    background: rgba(238, 232, 213, 0.9);
+    color: #586e75;
+}
+
+.theme-blue .navigation-controls {
+    background: rgba(187, 222, 251, 0.9);
+    color: #1565c0;
+}
+
+.theme-green .navigation-controls {
+    background: rgba(200, 230, 201, 0.9);
+    color: #2e7d32;
+}
+/* DELETE THIS DUPLICATE SECTION - it's already defined above */
+.navigation-mode .txt-content {
+    max-width: 210mm; /* A4 width */
+    min-height: 297mm; /* A4 height */
+    margin: 0 auto;
+    padding: 25mm; /* Standard A4 margins */
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    font-family: inherit;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* DELETE THIS DUPLICATE TOO */
+.txt-page-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.txt-page-info {
+    font-size: 14px;
+    color: #666;
+    min-width: 120px;
+    text-align: center;
+}
+/* KEEP THIS SECTION - FIX THE DIMENSIONS */
+.navigation-mode .txt-content {
+    width: 210mm; /* A4 width - FIXED */
+    height: 297mm; /* A4 height - FIXED */
+    margin: 10px auto; /* Added margin */
+    padding: 20mm; /* Reduced padding */
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    font-family: inherit;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* KEEP THIS - Fix container for proper layout */
+.txt-page-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+/* KEEP THIS - Fix navigation positioning */
+.txt-page-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 10px;
+}
+/* Fix for scroll mode - ensure content is visible and scrollable */
+.reader-content:not(.navigation-mode) {
+    overflow-y: auto !important;
+}
+
+/* Fix for A4 paper in navigation mode - ensure content fits and is visible */
+.navigation-mode .txt-content {
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 10px auto !important;
+    padding: 20mm !important;
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    font-family: inherit;
+    box-sizing: border-box;
+    overflow: auto !important; /* Changed from hidden to auto */
+    display: block !important;
+}
+
+/* Ensure PDF pages are properly displayed in both modes */
+#pdf-container {
+    overflow: auto !important;
+}
+
+.pdf-navigation-container {
+    overflow: auto !important;
+}
+
+/* Fix for DOCX content in navigation mode */
+.navigation-mode .docx-content {
+    max-width: 210mm;
+    min-height: 297mm;
+    margin: 10px auto;
+    padding: 20mm;
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    overflow: auto !important;
+}
+/* Hide footer for all book types */
+.reader-footer {
+    display: none !important;
+}
+
+/* OR hide only for specific book types */
+.reader-footer[v-if*="epub"],
+.reader-footer[v-if*="pdf"] {
+    display: none !important;
+}
+.txt-content {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.txt-content::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
 </style>
 </head>
 <body>
@@ -1450,51 +1686,151 @@ document.addEventListener('vue-ready', function() {
         <!-- Reader View (takes over the whole book) -->
         <div v-if="isAuthenticated && currentBook" class="reader-container" :class="`theme-${theme}`">
             <!-- Reader Header -->
-            <div class="reader-header">
-                <div class="control-group">
-                    <el-button icon="el-icon-back" circle @click="closeBook" size="small"></el-button>
-                    <el-button v-if="currentBook.type === 'epub'" icon="el-icon-arrow-left" circle @click="prevPage" size="small"></el-button>
-                    <el-button v-if="currentBook.type === 'epub'" icon="el-icon-arrow-right" circle @click="nextPage" size="small"></el-button>
-                </div>
-                <div class="book-title">{{ currentBook.title }}</div>
-                <div class="control-group">
-                    <el-button icon="el-icon-zoom-out" circle @click="zoomOut" size="small"></el-button>
-                    <el-button icon="el-icon-zoom-in" circle @click="zoomIn" size="small"></el-button>
-                    <!-- <el-button icon="el-icon-search" circle @click="toggleSearch" size="small"></el-button>
-                    <el-button icon="el-icon-s-operation" circle @click="showSettings" size="small"></el-button> -->
-                    <el-button icon="el-icon-switch-button" circle @click="logout" size="small"></el-button>
-                </div>
-            </div>
+         <!-- Reader Header -->
+<div class="reader-header">
+    <div class="control-group">
+        <el-button icon="el-icon-back" circle @click="closeBook" size="small"></el-button>
+        <el-button v-if="currentBook.type === 'epub'" icon="el-icon-arrow-left" circle @click="prevPage" size="small"></el-button>
+        <el-button v-if="currentBook.type === 'epub'" icon="el-icon-arrow-right" circle @click="nextPage" size="small"></el-button>
+    </div>
+    <div class="book-title">{{ currentBook.title }}</div>
+    <div class="control-group">
+        <!-- Navigation Toggle Button -->
+        <el-tooltip :content="navigationMode ? 'Switch to Scroll Mode' : 'Switch to Page Navigation'" placement="bottom">
+            <el-button 
+                :icon="navigationMode ? 'el-icon-sort' : 'el-icon-document'" 
+                circle 
+                @click="toggleNavigationMode" 
+                size="small"
+                :type="navigationMode ? 'primary' : ''">
+            </el-button>
+        </el-tooltip>
+        
+        <el-button icon="el-icon-zoom-out" circle @click="zoomOut" size="small"></el-button>
+        <el-button icon="el-icon-zoom-in" circle @click="zoomIn" size="small"></el-button>
+        <el-button icon="el-icon-switch-button" circle @click="logout" size="small"></el-button>
+    </div>
+</div>
             
-            <!-- Reader Content -->
-            <div class="reader-content">
-                <div v-if="!isReady" class="loading">
-                    <el-button type="text" :loading="true">Loading {{ currentBook.type.toUpperCase() }}...</el-button>
-                    <div v-if="loadError" class="error-message">
-                        {{ loadError }}
-                    </div>
-                </div>
-                
-                <!-- EPUB Reader -->
-                <div v-else-if="currentBook.type === 'epub'" id="epub-container"></div>
-                
-                <!-- PDF Reader -->
-                <div v-else-if="currentBook.type === 'pdf'" id="pdf-container">
-                    <canvas v-for="page in pdfPages" :key="page.pageNumber" :id="`pdf-page-${page.pageNumber}`" class="pdf-page"></canvas>
-                </div>
-                
-                <!-- DOCX/DOC Reader -->
-                <div v-else-if="currentBook.type === 'docx' || currentBook.type === 'doc'" class="docx-content" v-html="docxContent"></div>
-                
-                <!-- TXT Reader -->
-                <div v-else-if="currentBook.type === 'txt'" class="txt-content">{{ txtContent }}</div>
-                
-                <!-- Unsupported Format -->
-                <div v-else class="loading">
-                    Unsupported file format: {{ currentBook.type }}
-                </div>
+          <!-- Reader Content -->
+<div class="reader-content" :class="{ 'navigation-mode': navigationMode }">
+    <div v-if="!isReady" class="loading">
+        <el-button type="text" :loading="true">Loading {{ currentBook.type.toUpperCase() }}...</el-button>
+        <div v-if="loadError" class="error-message">
+            {{ loadError }}
+        </div>
+    </div>
+    
+    <!-- EPUB Reader -->
+    <div v-else-if="currentBook.type === 'epub'" 
+         :class="{ 'epub-navigation-container': navigationMode }"
+         :id="navigationMode ? 'epub-navigation-container' : 'epub-container'">
+    </div>
+    
+    <!-- PDF Reader -->
+    <div v-else-if="currentBook.type === 'pdf'" 
+         :class="{ 'pdf-navigation-container': navigationMode }"
+         :id="navigationMode ? 'pdf-navigation-container' : 'pdf-container'">
+        
+        <div v-if="navigationMode" class="pdf-navigation-view">
+            <canvas v-for="page in pdfPages" 
+                    :key="page.pageNumber" 
+                    :id="`pdf-page-${page.pageNumber}`" 
+                    class="pdf-page"
+                    :style="{ display: currentPdfPage === page.pageNumber ? 'block' : 'none' }">
+            </canvas>
+        </div>
+        <div v-else>
+            <canvas v-for="page in pdfPages" 
+                    :key="page.pageNumber" 
+                    :id="`pdf-page-${page.pageNumber}`" 
+                    class="pdf-page">
+            </canvas>
+        </div>
+        
+        <!-- PDF Navigation Controls -->
+        <div v-if="navigationMode && currentBook.type === 'pdf'" class="navigation-controls">
+            <el-button 
+                icon="el-icon-arrow-left" 
+                @click="prevPdfPage"
+                :disabled="currentPdfPage <= 1"
+                size="small">
+                Previous
+            </el-button>
+            <span class="page-info">
+                Page {{ currentPdfPage }} of {{ pdfPages.length }}
+            </span>
+            <el-button 
+                icon="el-icon-arrow-right" 
+                @click="nextPdfPage"
+                :disabled="currentPdfPage >= pdfPages.length"
+                size="small">
+                Next
+            </el-button>
+        </div>
+    </div>
+    
+    <!-- DOCX/DOC Reader -->
+    <div v-else-if="currentBook.type === 'docx' || currentBook.type === 'doc'" 
+         :class="{ 'content-navigation-container': navigationMode }">
+        
+        <div :class="{ 'content-navigation-view': navigationMode }" class="docx-content" v-html="docxContent"></div>
+        
+        <!-- DOCX Navigation Controls -->
+        <div v-if="navigationMode" class="navigation-controls">
+            <el-button 
+                icon="el-icon-arrow-up" 
+                @click="scrollContent(-300)"
+                size="small">
+                Scroll Up
+            </el-button>
+            <el-button 
+                icon="el-icon-arrow-down" 
+                @click="scrollContent(300)"
+                size="small">
+                Scroll Down
+            </el-button>
+        </div>
+    </div>
+<!-- TXT Reader -->
+<div v-else-if="currentBook.type === 'txt'" 
+     :class="{ 'content-navigation-container': navigationMode }">
+    
+    <!-- Navigation Mode -->
+    <div v-if="navigationMode" class="txt-page-container">
+        <div class="content-navigation-view">
+            <div class="txt-content">
+                {{ currentTxtPageContent }}
             </div>
-            
+        </div>
+        
+        <div class="navigation-controls">
+            <el-button 
+                icon="el-icon-arrow-left" 
+                @click="prevTxtPage"
+                :disabled="currentTxtPage <= 1"
+                size="small">
+                Previous
+            </el-button>
+            <span class="page-info">
+                Page {{ currentTxtPage }} of {{ totalTxtPages }}
+            </span>
+            <el-button 
+                icon="el-icon-arrow-right" 
+                @click="nextTxtPage"
+                :disabled="currentTxtPage >= totalTxtPages"
+                size="small">
+                Next
+            </el-button>
+        </div>
+    </div>
+    
+    <!-- Scroll Mode (Original) -->
+    <div v-else class="txt-content scroll-mode">
+        {{ txtContent }}
+    </div>
+</div>
+</div>
             <!-- Footer -->
             <div class="reader-footer" v-if="currentBook.type === 'epub' || currentBook.type === 'pdf'">
                 <el-slider 
@@ -1531,8 +1867,7 @@ document.addEventListener('vue-ready', function() {
                         <div class="nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">Borrowed</div>
                         <div class="nav-tab" :class="{ active: currentTab === 'queue' }" @click="currentTab = 'queue'">Queue</div>
                              <div class="nav-tab" :class="{ active: currentTab === 'downloaded' }" @click="currentTab = 'downloaded'" >Downloaded</div>
-    <el-button icon="el-icon-s-operation" circle @click="showSettings" size="small" style="margin-left: 220px; padding-left: 10px; margin-bottom:5px; width:40px; height:40px"></el-button>                                          
-                        <el-button icon="el-icon-s-operation" circle @click="showSettings" size="small" style="margin-left: 220px; padding-left: 10px; margin-bottom:5px; width:40px; height:40px"></el-button>
+                        <el-button icon="el-icon-s-operation" circle @click="showSettings" size="small" style="margin-left: 150px; padding-left: 10px; margin-bottom:5px; width:40px; height:40px"></el-button>
 
                         <el-button icon="el-icon-switch-button" circle @click="logout" size="small" style=" margin-bottom:5px; width:40px; height:40px"></el-button>
 
@@ -2050,6 +2385,12 @@ const secureStorage = new SecureStorage();
     el: '#app',
     data() {
         return {
+        currentTxtPage: 1,
+        totalTxtPages: 1,
+        txtPages: [],
+        currentTxtPageContent: '',
+        navigationMode: false,
+        currentPdfPage: 1,
             // Authentication
             isAuthenticated: false,
             token: null,
@@ -2168,7 +2509,12 @@ async mounted() {
         if (savedTheme) {
             this.theme = savedTheme;
         }
-        
+         // Load navigation mode preference
+    const savedNavigationMode = localStorage.getItem('reader-navigation-mode');
+    if (savedNavigationMode) {
+        this.navigationMode = savedNavigationMode === 'true';
+    }
+    
         // Initialize secure storage
         await secureStorage.init();
         
@@ -2211,6 +2557,175 @@ async mounted() {
 },
 
 methods: {
+     // NEW: Enhanced toggleNavigationMode to handle A4 formatting and pagination
+// Enhanced toggleNavigationMode to properly handle both modes
+toggleNavigationMode() {
+    this.navigationMode = !this.navigationMode;
+    
+    if (this.navigationMode && this.currentBook.type === 'txt') {
+        this.paginateTxtContent();
+    }
+    
+    // Reset to first page when switching to navigation mode
+    if (this.navigationMode) {
+        if (this.currentBook.type === 'pdf') {
+            this.currentPdfPage = 1;
+        } else if (this.currentBook.type === 'txt') {
+            this.currentTxtPage = 1;
+            this.currentTxtPageContent = this.txtPages[0] || '';
+        }
+    }
+},
+    
+    // NEW: Paginate TXT content for A4 paper navigation
+// UPDATE this method for better pagination
+paginateTxtContent() {
+    if (!this.txtContent || this.currentBook.type !== 'txt') return;
+    
+    // Reset pagination
+    this.txtPages = [];
+    this.currentTxtPage = 1;
+    
+    // Better pagination: split by lines to fit A4 page
+    const lines = this.txtContent.split('\n');
+    const linesPerPage = 40; // Adjust based on your font size
+    let currentPageLines = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+        currentPageLines.push(lines[i]);
+        
+        if (currentPageLines.length >= linesPerPage || i === lines.length - 1) {
+            this.txtPages.push(currentPageLines.join('\n'));
+            currentPageLines = [];
+        }
+    }
+    
+    this.totalTxtPages = this.txtPages.length;
+    this.currentTxtPageContent = this.txtPages[0] || '';
+},
+    
+    // NEW: Navigate to next TXT page
+    nextTxtPage() {
+        if (this.currentTxtPage < this.totalTxtPages) {
+            this.currentTxtPage++;
+            this.currentTxtPageContent = this.txtPages[this.currentTxtPage - 1];
+        }
+    },
+    
+    // NEW: Navigate to previous TXT page
+    prevTxtPage() {
+        if (this.currentTxtPage > 1) {
+            this.currentTxtPage--;
+            this.currentTxtPageContent = this.txtPages[this.currentTxtPage - 1];
+        }
+    },
+
+  
+    
+    // Initialize navigation mode
+    initializeNavigationMode() {
+        if (this.currentBook.type === 'pdf') {
+            this.currentPdfPage = 1;
+            this.scrollToPdfPage(1);
+        }
+        // For EPUB, we'll use the existing nextPage/prevPage methods
+    },
+    
+    // Cleanup navigation mode
+    cleanupNavigationMode() {
+        // Reset any navigation state if needed
+        if (this.currentBook.type === 'pdf') {
+            // Allow scrolling again
+            const container = document.getElementById('pdf-container');
+            if (container) {
+                container.scrollTop = 0;
+            }
+        }
+    },
+    
+    // PDF Navigation
+    nextPdfPage() {
+        if (this.currentPdfPage < this.pdfPages.length) {
+            this.currentPdfPage++;
+            this.scrollToPdfPage(this.currentPdfPage);
+        }
+    },
+    
+    prevPdfPage() {
+        if (this.currentPdfPage > 1) {
+            this.currentPdfPage--;
+            this.scrollToPdfPage(this.currentPdfPage);
+        }
+    },
+    
+    scrollToPdfPage(pageNumber) {
+        this.currentPdfPage = pageNumber;
+        // The page will be shown/hidden via Vue's conditional rendering
+        // Scroll to top of container
+        const container = document.getElementById('pdf-navigation-container');
+        if (container) {
+            container.scrollTop = 0;
+        }
+        
+        // Update progress for slider
+        this.updatePdfProgress();
+    },
+    
+    updatePdfProgress() {
+        if (this.currentBook.type === 'pdf') {
+            this.progress = (this.currentPdfPage / this.pdfPages.length) * 100;
+        }
+    },
+    
+    // Content scrolling for DOCX/TXT
+    scrollContent(amount) {
+        let container;
+        if (this.currentBook.type === 'docx' || this.currentBook.type === 'doc') {
+            container = document.querySelector('.content-navigation-view .docx-content');
+        } else if (this.currentBook.type === 'txt') {
+            container = document.querySelector('.content-navigation-view .txt-content');
+        }
+        
+        if (container) {
+            container.scrollTop += amount;
+        }
+    },
+    
+    // Update the existing onProgressChange method for PDF navigation
+    onProgressChange(value) {
+        if (this.currentBook.type === 'pdf') {
+            if (this.navigationMode) {
+                // In navigation mode, go to specific page
+                const pageNumber = Math.ceil((value / 100) * this.pdfPages.length);
+                this.scrollToPdfPage(pageNumber);
+            } else {
+                // In scroll mode, use existing behavior
+                const pageNumber = Math.ceil((value / 100) * this.pdfPages.length);
+                const pageElement = document.getElementById(`pdf-page-${pageNumber}`);
+                if (pageElement) {
+                    pageElement.scrollIntoView();
+                }
+            }
+        } else if (this.currentBook.type === 'epub' && this.rendition) {
+            const location = this.book.locations.cfiFromPercentage(value / 100);
+            this.rendition.display(location);
+        }
+    },
+    
+    // Update closeBook to reset navigation state
+    closeBook() {
+        this.currentBook = null;
+        this.isReady = false;
+        this.loadError = null;
+        this.rendition = null;
+        this.book = null;
+        this.pdfDoc = null;
+        this.pdfPages = [];
+        this.docxContent = '';
+        this.txtContent = '';
+        this.navigationMode = false; // Reset navigation mode
+        this.currentPdfPage = 1; // Reset PDF page
+    },
     // Handle window resize
     handleResize() {
         if (this.isMobile && this.currentTab === 'all') {
@@ -3346,28 +3861,32 @@ checkOfflineStatus() {
                     }
                 },
                 
-                // TXT Loader
-                async loadTXT(url) {
-                    try {
-                        const response = await fetch(url, {
-                            headers: {
-                                'Authorization': `Bearer ${this.token}`
-                            }
-                        });
-                        
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch text file');
-                        }
-                        
-                        this.txtContent = await response.text();
-                        if (!this.txtContent.trim()) {
-                            throw new Error('File appears to be empty');
-                        }
-                    } catch (error) {
-                        throw new Error(`Text file loading failed: ${error.message}`);
-                    }
-                },
-                
+              // TXT Loader
+async loadTXT(url) {
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch text file');
+        }
+        
+        this.txtContent = await response.text();
+        if (!this.txtContent.trim()) {
+            throw new Error('File appears to be empty');
+        }
+        
+        // Initialize pagination if in navigation mode
+        if (this.navigationMode) {
+            this.paginateTxtContent();
+        }
+    } catch (error) {
+        throw new Error(`Text file loading failed: ${error.message}`);
+    }
+},
                 // Navigation Methods
                 closeBook() {
                     this.currentBook = null;
@@ -3413,25 +3932,43 @@ checkOfflineStatus() {
                     this.zoomLevel = Math.max(0.5, this.zoomLevel - 0.1);
                     this.applyZoom();
                 },
-                
-                applyZoom() {
-                    const effectiveSize = this.fontSize * this.zoomLevel;
-                    
-                    if (this.currentBook.type === 'pdf') {
-                        this.renderPDFPages();
-                    } else if (this.currentBook.type === 'docx' || this.currentBook.type === 'doc') {
-                        const content = document.querySelector('.docx-content');
-                        if (content) {
-                            content.style.fontSize = `${effectiveSize}px`;
-                        }
-                    } else if (this.currentBook.type === 'txt') {
-                        const content = document.querySelector('.txt-content');
-                        if (content) {
-                            content.style.fontSize = `${effectiveSize}px`;
-                        }
-                    }
-                },
-                
+                // Your existing EPUB methods will work in both modes
+prevPage() {
+    if (this.rendition) {
+        this.rendition.prev();
+        this.updateProgress();
+    }
+},
+
+nextPage() {
+    if (this.rendition) {
+        this.rendition.next();
+        this.updateProgress();
+    }
+},
+              applyZoom() {
+    const effectiveSize = this.fontSize * this.zoomLevel;
+    
+    if (this.currentBook.type === 'pdf') {
+        this.renderPDFPages();
+    } else if (this.currentBook.type === 'docx' || this.currentBook.type === 'doc') {
+        const content = document.querySelector('.docx-content');
+        if (content) {
+            content.style.fontSize = `${effectiveSize}px`;
+        }
+    } else if (this.currentBook.type === 'txt') {
+        // Apply zoom to both navigation and scroll modes
+        const navContent = document.querySelector('.navigation-mode .txt-content');
+        const scrollContent = document.querySelector('.scroll-mode.txt-content');
+        
+        if (navContent) {
+            navContent.style.fontSize = `${effectiveSize}px`;
+        }
+        if (scrollContent) {
+            scrollContent.style.fontSize = `${effectiveSize}px`;
+        }
+    }
+},
                 applyTheme() {
                     // Save theme to localStorage
                     localStorage.setItem('reader-theme', this.theme);
@@ -3548,7 +4085,11 @@ showSettings() {
                 
                 zoomLevel() {
                     this.applyZoom();
-                }
+                },
+                navigationMode(newVal) {
+        // Save navigation preference
+        localStorage.setItem('reader-navigation-mode', newVal.toString());
+    }
             }
         });
         // Enhanced offline detection
