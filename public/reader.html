@@ -2485,14 +2485,7 @@ const secureStorage = new SecureStorage();
             return window.innerWidth <= 900;
         },
         
-        // ADD THIS MISSING COMPUTED PROPERTY:
-        queuableBooks() {
-            return this.bookList.filter(book => 
-                book.available_copies <= 0 && 
-                !this.hasRentedBook(book.id) && 
-                !this.hasQueuedBook(book.id)
-            );
-        }
+        
     },
 async mounted() {
     // Check for existing authentication
@@ -3220,6 +3213,7 @@ computed: {
             !this.hasQueuedBook(book.id)
         );
     }
+    
 },
 // Add this method to format queue information
 getQueueDisplay(book) {
@@ -4188,6 +4182,319 @@ function hideDialogsWhenOffline() {
         });
     }
 }
+
+// ===== SMART PROTECTION SYSTEM =====
+(function() {
+    'use strict';
+    
+    // Store original console methods before overriding
+    const originalConsole = {
+        log: console.log,
+        warn: console.warn,
+        error: console.error,
+        info: console.info
+    };
+    
+    // Check if user is authenticated
+    function isUserAuthenticated() {
+        return !!localStorage.getItem('reader-token');
+    }
+    
+    // Nuclear option - constantly check for devtools
+    function nuclearProtection() {
+        // Only activate protection if user is logged in
+        if (!isUserAuthenticated()) {
+            return;
+        }
+        
+        // Method 1: Check window dimensions
+        const widthCheck = window.outerWidth - window.innerWidth > 200;
+        const heightCheck = window.outerHeight - window.innerHeight > 200;
+        
+        // Method 2: Check debugger execution time
+        const debuggerCheck = () => {
+            const start = Date.now();
+            debugger;
+            return Date.now() - start > 1000;
+        };
+        
+        // Method 3: Check if devtools is focused
+        let devtoolsOpen = false;
+        const element = new Image();
+        Object.defineProperty(element, 'id', {
+            get: function() {
+                devtoolsOpen = true;
+            }
+        });
+        console.log('%c', element);
+        
+        // If ANY detection method triggers
+        if (widthCheck || heightCheck || debuggerCheck() || devtoolsOpen) {
+            // IMMEDIATE LOGOUT - Clear all sensitive data
+            localStorage.removeItem('reader-token');
+            localStorage.removeItem('reader-user');
+            localStorage.removeItem('deviceId');
+            
+            // Clear session storage
+            sessionStorage.clear();
+            
+            // Clear all cookies
+            document.cookie.split(";").forEach(function(c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            
+            // Clear IndexedDB
+            if (window.indexedDB) {
+                indexedDB.databases().then(function(databases) {
+                    databases.forEach(function(database) {
+                        indexedDB.deleteDatabase(database.name);
+                    });
+                }).catch(function(error) {
+                    console.error('Error clearing IndexedDB:', error);
+                });
+            }
+            
+            // Show logout message but DON'T freeze the page
+            const existingMessage = document.getElementById('security-message');
+            if (!existingMessage) {
+                const message = document.createElement('div');
+                message.id = 'security-message';
+                message.innerHTML = `
+                    <div style="
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: #f56c6c;
+                        color: white;
+                        padding: 15px 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                        z-index: 9999;
+                        font-family: Arial;
+                        font-size: 14px;
+                        max-width: 300px;
+                        animation: slideIn 0.3s ease-out;
+                    ">
+                        🔒 Security Alert: Developer tools detected<br>
+                        <small>You have been logged out for security reasons</small>
+                    </div>
+                `;
+                document.body.appendChild(message);
+                
+                // Auto-remove message after 5 seconds
+                setTimeout(() => {
+                    if (message.parentNode) {
+                        message.parentNode.removeChild(message);
+                    }
+                }, 5000);
+            }
+            
+            // Force page reload to reset Vue state
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+            
+            return true; // Protection triggered
+        }
+        return false; // Protection not triggered
+    }
+
+    // Run nuclear protection every 500ms
+    setInterval(nuclearProtection, 500);
+
+    // Block ALL keyboard shortcuts - BUT ALLOW F5 for refresh
+    document.addEventListener('keydown', function(e) {
+        const blockedKeys = [
+            'F12', 'F11', 'F10', 'F9', 'F8', 'F7',
+            'I', 'J', 'C', 'U', 'S', 'R'
+        ];
+        
+        const blockedCombinations = [
+            e.ctrlKey && e.shiftKey && e.key === 'I',
+            e.ctrlKey && e.shiftKey && e.key === 'J',
+            e.ctrlKey && e.shiftKey && e.key === 'C',
+            e.altKey && e.shiftKey,
+            e.metaKey && e.shiftKey,
+            e.ctrlKey && e.altKey,
+            (e.ctrlKey || e.metaKey) && e.key === 'u',
+            (e.ctrlKey || e.metaKey) && e.key === 's'
+        ];
+
+        // Allow F5 for refresh and Ctrl+R
+        const isRefresh = e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key === 'r');
+        
+        if (!isRefresh && (blockedKeys.includes(e.key) || blockedCombinations.some(comb => comb))) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            // Only trigger if user is authenticated
+            if (isUserAuthenticated()) {
+                nuclearProtection();
+            }
+            return false;
+        }
+    });
+
+    // Block ALL mouse events that could open devtools
+    document.addEventListener('mousedown', function(e) {
+        if ((e.button === 2 || (e.ctrlKey && e.button === 0)) && isUserAuthenticated()) {
+            e.preventDefault();
+            e.stopPropagation();
+            nuclearProtection();
+        }
+    });
+
+    document.addEventListener('contextmenu', function(e) {
+        if (isUserAuthenticated()) {
+            e.preventDefault();
+            e.stopPropagation();
+            nuclearProtection();
+            return false;
+        }
+    });
+
+    // Completely disable text selection (but allow in inputs)
+    document.addEventListener('selectstart', function(e) {
+        if (e.target.tagName !== 'INPUT' && 
+            e.target.tagName !== 'TEXTAREA' && 
+            !e.target.isContentEditable) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    });
+
+    document.addEventListener('copy', function(e) {
+        // Allow copying from input fields
+        if (e.target.tagName !== 'INPUT' && 
+            e.target.tagName !== 'TEXTAREA' && 
+            !e.target.isContentEditable) {
+            e.preventDefault();
+            e.clipboardData.setData('text/plain', '🚫 Copying disabled in BeteBrana');
+            return false;
+        }
+    });
+
+    document.addEventListener('cut', function(e) {
+        if (e.target.tagName !== 'INPUT' && 
+            e.target.tagName !== 'TEXTAREA' && 
+            !e.target.isContentEditable) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    document.addEventListener('paste', function(e) {
+        if (e.target.tagName !== 'INPUT' && 
+            e.target.tagName !== 'TEXTAREA' && 
+            !e.target.isContentEditable) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Disable drag and drop for non-input elements
+    document.addEventListener('dragstart', function(e) {
+        if (e.target.tagName !== 'INPUT' && 
+            e.target.tagName !== 'TEXTAREA' && 
+            !e.target.isContentEditable) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Override console but preserve error logging for the app
+    const noop = () => {};
+    const consoleHandler = {
+        get: function(obj, prop) {
+            // Allow error and warn for app functionality
+            if (prop === 'error' || prop === 'warn') {
+                return function(...args) {
+                    // Still log to original console but don't show to user
+                    originalConsole[prop].apply(console, args);
+                };
+            }
+            return noop;
+        }
+    };
+
+    window.console = new Proxy(window.console, consoleHandler);
+
+    // Break debugger but don't break other functionality
+    const originalDebugger = window.debugger;
+    Object.defineProperty(window, 'debugger', {
+        value: function() {
+            if (isUserAuthenticated()) {
+                nuclearProtection();
+            }
+        },
+        writable: false,
+        configurable: false
+    });
+
+    // Constant debugger to make devtools unusable (only when logged in)
+    setInterval(() => {
+        try {
+            if (isUserAuthenticated()) {
+                debugger;
+            }
+        } catch(e) {}
+    }, 100);
+
+    // Detect iframe inspection (only when logged in)
+    if (window.top !== window.self && isUserAuthenticated()) {
+        nuclearProtection();
+    }
+
+})();
+
+// Add CSS for the security message animation
+const securityStyle = document.createElement('style');
+securityStyle.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    * {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+    
+    input, textarea, [contenteditable] {
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        -ms-user-select: text !important;
+        user-select: text !important;
+    }
+    
+    body {
+        -webkit-user-drag: none !important;
+        -moz-user-drag: none !important;
+        -ms-user-drag: none !important;
+        user-drag: none !important;
+    }
+`;
+document.head.appendChild(securityStyle);
+
+// Make it extremely difficult to remove this protection
+Object.defineProperty(window, 'nuclearProtection', {
+    value: nuclearProtection,
+    writable: false,
+    configurable: false,
+    enumerable: false
+});
 
 // Check every 100ms and hide dialogs when offline
 setInterval(hideDialogsWhenOffline, 100);
