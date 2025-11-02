@@ -1661,6 +1661,18 @@ body.offline .v-modal {
     visibility: hidden !important;
     opacity: 0 !important;
 }
+/* Add to your existing CSS */
+.offline-disabled {
+    opacity: 0.5;
+    filter: grayscale(100%);
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.offline-disabled .book-info h3,
+.offline-disabled .book-info p {
+    color: #999 !important;
+}
 </style>
 
 <script>
@@ -1880,7 +1892,10 @@ document.addEventListener('vue-ready', function() {
                             <p>You have no Borrowed books</p>
                         </div>
                         <div v-else class="book-list">
-                            <div v-for="rental in userRentals" :key="rental.id" class="book-item" @click="openRentedBook(rental)">
+                            <div v-for="rental in userRentals" :key="rental.id"   
+                               class="book-item" 
+                                :class="{ 'offline-disabled': offlineMode }"
+                                @click="!offlineMode && openRentedBook(rental)">
                                 <div class="book-cover">
                                     <img v-if="rental.cover_image" :src="`http://localhost:3000${rental.cover_image}`" :alt="rental.title">
                                     <div v-else class="placeholder">
@@ -1900,13 +1915,14 @@ document.addEventListener('vue-ready', function() {
                                         {{ getTimeRemaining(rental) }}
                                     </div>
                                 </div>
-                          <div class="rental-actions">
+<!-- Update the rental actions buttons -->
+<div class="rental-actions">
     <el-button 
         type="primary" 
         size="mini" 
         @click.stop="openRentedBook(rental)"
         :disabled="offlineMode"
-        :title="offlineMode ? 'You are offline' : 'Read book'">
+        :title="offlineMode ? 'Book unavailable offline - Download first' : 'Read book'">
         Read
     </el-button>
     <el-button 
@@ -2940,6 +2956,12 @@ async openBook(bookInfo) {
 },
                 
 async openRentedBook(rental) {
+    // Add this offline check at the very beginning
+    if (this.offlineMode) {
+        this.$message.warning('This book is not available offline. Please go online to access borrowed books.');
+        return;
+    }
+    
     try {
         // Get book details
         const book = this.bookList.find(b => b.id === rental.book_id);
@@ -4182,7 +4204,29 @@ function hideDialogsWhenOffline() {
         });
     }
 }
-
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
 // ===== SMART PROTECTION SYSTEM =====
 (function() {
     'use strict';
@@ -4208,8 +4252,8 @@ function hideDialogsWhenOffline() {
         }
         
         // Method 1: Check window dimensions
-        const widthCheck = window.outerWidth - window.innerWidth > 200;
-        const heightCheck = window.outerHeight - window.innerHeight > 200;
+        const widthCheck = window.outerWidth - window.innerWidth > 800;
+        const heightCheck = window.outerHeight - window.innerHeight > 800;
         
         // Method 2: Check debugger execution time
         const debuggerCheck = () => {
@@ -4495,6 +4539,29 @@ Object.defineProperty(window, 'nuclearProtection', {
     configurable: false,
     enumerable: false
 });
+
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+// ===== SMART PROTECTION SYSTEM =====
+
 
 // Check every 100ms and hide dialogs when offline
 setInterval(hideDialogsWhenOffline, 100);
