@@ -1856,7 +1856,7 @@ document.addEventListener('vue-ready', function() {
                         <div class="mobile-nav-title">My Library</div>
                         
                         <div class="mobile-nav-tabs">
-                            <div class="mobile-nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">Rented</div>
+                            <div class="mobile-nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">Borrowed</div>
                             <div class="mobile-nav-tab" :class="{ active: currentTab === 'queue' }" @click="currentTab = 'queue'">Queue</div>
                                 <div class="mobile-nav-tab" :class="{ active: currentTab === 'downloaded' }" @click="currentTab = 'downloaded'">Downloaded</div>
 
@@ -1875,9 +1875,9 @@ document.addEventListener('vue-ready', function() {
                     
                     <!-- Currently Rented Books -->
                     <div v-if="currentTab === 'rentals'" class="dashboard-section">
-                        <h3 class="dashboard-subtitle">Currently Rented Books</h3>
+                        <h3 class="dashboard-subtitle">Currently Borrowed Books</h3>
                         <div v-if="userRentals.length === 0" class="empty-library">
-                            <p>You have no rented books</p>
+                            <p>You have no Borrowed books</p>
                         </div>
                         <div v-else class="book-list">
                             <div v-for="rental in userRentals" :key="rental.id" class="book-item" @click="openRentedBook(rental)">
@@ -1956,7 +1956,7 @@ document.addEventListener('vue-ready', function() {
                                 <div class="rental-actions">
                                     <el-button type="primary" size="mini" 
                                                @click.stop="rentBookFromQueue(item)"
-                                               :disabled="!isBookAvailable(item.book_id)">Rent Now</el-button>
+                                               :disabled="!isBookAvailable(item.book_id)">Borrow Now</el-button>
                                     <el-button type="danger" size="mini" @click.stop="removeFromQueue(item)">Remove</el-button>
                                 </div>
                             </div>
@@ -2066,7 +2066,7 @@ document.addEventListener('vue-ready', function() {
         <!-- Countdown Timer - Only show when book is reserved for user -->
         <div v-if="book.queueInfo && book.queueInfo.hasReservation && book.queueInfo.timeRemaining > 0" 
              class="queue-countdown-timer">
-            <small>⏰ Rent within: {{ formatQueueTimeRemaining(book.queueInfo.timeRemaining) }}</small>
+            <small>borrowing within: {{ formatQueueTimeRemaining(book.queueInfo.timeRemaining) }}</small>
         </div>
         
         <!-- Show queue position details -->
@@ -2084,7 +2084,7 @@ document.addEventListener('vue-ready', function() {
              size="mini" 
              type="success" 
              @click.stop="rentBook(book)">
-    Rent Now (Reserved!)
+    Borrow Now (Reserved!)
   </el-button>
   
   <!-- Show rent button if book is available and no reservations exist -->
@@ -2092,7 +2092,7 @@ document.addEventListener('vue-ready', function() {
              size="mini" 
              type="primary" 
              @click.stop="rentBook(book)">
-    Rent Now
+    Borrow Now
   </el-button>
   
   <!-- Show join queue button if book is unavailable -->
@@ -2559,22 +2559,29 @@ async mounted() {
 methods: {
      // NEW: Enhanced toggleNavigationMode to handle A4 formatting and pagination
 // Enhanced toggleNavigationMode to properly handle both modes
+// Enhanced toggleNavigationMode to handle initialization properly
 toggleNavigationMode() {
     this.navigationMode = !this.navigationMode;
     
-    if (this.navigationMode && this.currentBook.type === 'txt') {
-        this.paginateTxtContent();
-    }
-    
-    // Reset to first page when switching to navigation mode
-    if (this.navigationMode) {
-        if (this.currentBook.type === 'pdf') {
-            this.currentPdfPage = 1;
-        } else if (this.currentBook.type === 'txt') {
-            this.currentTxtPage = 1;
-            this.currentTxtPageContent = this.txtPages[0] || '';
+    // Use nextTick to ensure DOM is updated before manipulating content
+    this.$nextTick(() => {
+        if (this.navigationMode && this.currentBook.type === 'txt') {
+            this.paginateTxtContent();
         }
-    }
+        
+        // Reset to first page when switching to navigation mode
+        if (this.navigationMode) {
+            if (this.currentBook.type === 'pdf') {
+                this.currentPdfPage = 1;
+            } else if (this.currentBook.type === 'txt') {
+                this.currentTxtPage = 1;
+                this.currentTxtPageContent = this.txtPages[0] || '';
+            }
+        }
+        
+        // Force re-render of content
+        this.applyZoom();
+    });
 },
     
     // NEW: Paginate TXT content for A4 paper navigation
@@ -2912,55 +2919,61 @@ paginateTxtContent() {
                 },
                 
                 // Book Operations
-                async openBook(bookInfo) {
-                    try {
-                        // Check if user has access to this book
-                        const response = await this.apiCall(`/books/${bookInfo.id}/read`);
-                        
-                        this.currentBook = {
-                            ...bookInfo,
-                            type: bookInfo.file_type,
-                            file_path: response.book.file_path
-                        };
-                        
-                        this.isReady = false;
-                        this.loadError = null;
-                        
-                        await this.loadDocument(this.currentBook);
-                        this.isReady = true;
-                        
-                    } catch (error) {
-                        console.error('Error opening book:', error);
-                        this.loadError = `Failed to open book: ${error.message}`;
-                        this.$message.error(`Error opening book: ${error.message}`);
-                    }
-                },
+async openBook(bookInfo) {
+    try {
+        // Check if user has access to this book
+        const response = await this.apiCall(`/books/${bookInfo.id}/read`);
+        
+        this.currentBook = {
+            ...bookInfo,
+            type: bookInfo.file_type,
+            file_path: response.book.file_path
+        };
+        
+        this.isReady = false;
+        this.loadError = null;
+        
+        // Set navigation mode to false by default (scroll mode)
+        this.navigationMode = false;
+        
+        await this.loadDocument(this.currentBook);
+        this.isReady = true;
+        
+    } catch (error) {
+        console.error('Error opening book:', error);
+        this.loadError = `Failed to open book: ${error.message}`;
+        this.$message.error(`Error opening book: ${error.message}`);
+    }
+},
                 
-                async openRentedBook(rental) {
-                    try {
-                        // Get book details
-                        const book = this.bookList.find(b => b.id === rental.book_id);
-                        if (!book) {
-                            throw new Error('Book not found');
-                        }
-                        
-                        this.currentBook = {
-                            ...book,
-                            type: book.file_type
-                        };
-                        
-                        this.isReady = false;
-                        this.loadError = null;
-                        
-                        await this.loadDocument(this.currentBook);
-                        this.isReady = true;
-                        
-                    } catch (error) {
-                        console.error('Error opening rented book:', error);
-                        this.loadError = `Failed to open book: ${error.message}`;
-                        this.$message.error(`Error opening book: ${error.message}`);
-                    }
-                },
+async openRentedBook(rental) {
+    try {
+        // Get book details
+        const book = this.bookList.find(b => b.id === rental.book_id);
+        if (!book) {
+            throw new Error('Book not found');
+        }
+        
+        this.currentBook = {
+            ...book,
+            type: book.file_type
+        };
+        
+        this.isReady = false;
+        this.loadError = null;
+        
+        // Set navigation mode to false by default (scroll mode)
+        this.navigationMode = false;
+        
+        await this.loadDocument(this.currentBook);
+        this.isReady = true;
+        
+    } catch (error) {
+        console.error('Error opening rented book:', error);
+        this.loadError = `Failed to open book: ${error.message}`;
+        this.$message.error(`Error opening book: ${error.message}`);
+    }
+},
                     // Add this method to your Vue component methods
                 async getQueueInfo(bookId) {
                     try {
@@ -3244,28 +3257,41 @@ getQueueDisplay(book) {
                     }
                 },
                 
-                async returnBook(rental) {
-                    try {
-                        await this.apiCall('/books/return', {
-                            method: 'POST',
-                            body: {
-                                rentalId: rental.id,
-                                bookId: rental.book_id
-                            }
-                        });
-                        
-                        this.$message.success('Book returned successfully');
-                        
-                        // Reload data
-                        await this.loadLibrary();
-                        await this.loadUserData();
-                        
-                    } catch (error) {
-                        console.error('Error returning book:', error);
-                        this.$message.error('Error returning book: ' + error.message);
-                    }
-                },
-                
+async returnBook(rental) {
+    try {
+        // Return book to library
+        await this.apiCall('/books/return', {
+            method: 'POST',
+            body: {
+                rentalId: rental.id,
+                bookId: rental.book_id
+            }
+        });
+        
+        // Remove downloaded copy from secure storage
+        try {
+            await secureStorage.removeBook(rental.book_id);
+            console.log(`Downloaded book ${rental.book_id} removed successfully`);
+        } catch (downloadError) {
+            console.warn('Could not remove downloaded book:', downloadError);
+            // Continue with return even if download removal fails
+        }
+        
+        // Update downloaded books list
+        await this.loadDownloadedBooks();
+        
+        this.$message.success('Book returned successfully' + 
+            (this.offlineMode ? '' : ' and removed from downloads'));
+        
+        // Reload library and user data
+        await this.loadLibrary();
+        await this.loadUserData();
+        
+    } catch (error) {
+        console.error('Error returning book:', error);
+        this.$message.error('Error returning book: ' + error.message);
+    }
+},
                 // Helper methods
                 hasRentedBook(bookId) {
                     return this.userRentals.some(rental => rental.book_id === bookId);
@@ -3583,12 +3609,15 @@ async openDownloadedBook(book) {
         this.currentBook = {
             ...book,
             type: fileType,
-            file_type: fileType, // Ensure both type and file_type are set
+            file_type: fileType,
             offline: true
         };
         
         this.isReady = false;
         this.loadError = null;
+        
+        // Set navigation mode to false by default (scroll mode)
+        this.navigationMode = false;
         
         // For downloaded books, we already have the file content
         await this.loadDownloadedDocument(book);
@@ -3862,6 +3891,7 @@ checkOfflineStatus() {
                 },
                 
               // TXT Loader
+// TXT Loader - improved
 async loadTXT(url) {
     try {
         const response = await fetch(url, {
@@ -3879,7 +3909,7 @@ async loadTXT(url) {
             throw new Error('File appears to be empty');
         }
         
-        // Initialize pagination if in navigation mode
+        // Initialize pagination only if navigation mode is active
         if (this.navigationMode) {
             this.paginateTxtContent();
         }
