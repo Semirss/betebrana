@@ -1673,320 +1673,803 @@ body.offline .v-modal {
 .offline-disabled .book-info p {
     color: #999 !important;
 }
-  /* ===== NEW BOOK-LIKE NAVIGATION STYLES ===== */
-        
-        /* Book Navigation Mode */
-        .book-navigation-mode {
-            overflow: hidden !important;
-            position: relative;
-            background: #f5f0e6 !important; /* Parchment-like background */
-        }
-        
-        .book-view-container {
-            display: flex;
-            width: 100%;
-            height: 100%;
-            position: relative;
-            perspective: 1200px;
-        }
-        
-        .book-page {
-            position: absolute;
-            width: 50%;
-            height: 100%;
-            background: white;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            transition: transform 0.6s ease-in-out;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid #e0d6c8;
-        }
-        
-        .left-page {
-            left: 0;
-            transform-origin: right center;
-            border-radius: 5px 0 0 5px;
-            z-index: 2;
-        }
-        
-        .right-page {
-            right: 0;
-            transform-origin: left center;
-            border-radius: 0 5px 5px 0;
-            z-index: 1;
-        }
-        
-        /* Page turning animations */
-        .page-turning-left .left-page {
-            transform: rotateY(-180deg);
-            z-index: 1;
-        }
-        
-        .page-turning-left .right-page {
-            transform: rotateY(0deg);
-            z-index: 2;
-        }
-        
-        .page-turning-right .left-page {
-            transform: rotateY(0deg);
-            z-index: 2;
-        }
-        
-        .page-turning-right .right-page {
-            transform: rotateY(180deg);
-            z-index: 1;
-        }
-        
-        /* Page content */
-        .page-content {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-            line-height: 1.6;
-            font-family: 'Georgia', serif;
-            background: white;
-        }
-        
-        /* Page numbers */
-        .page-number {
-            position: absolute;
-            bottom: 15px;
-            font-size: 14px;
-            color: #888;
-            font-style: italic;
-        }
-        
-        .left-page .page-number {
-            right: 20px;
-        }
-        
-        .right-page .page-number {
-            left: 20px;
-        }
-        
-        /* Navigation arrows */
-        .book-navigation-arrows {
-            position: absolute;
-            top: 50%;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-            transform: translateY(-50%);
-            z-index: 10;
-            pointer-events: none;
-        }
-        
-        .nav-arrow {
-            width: 50px;
-            height: 50px;
-            background: rgba(139, 69, 19, 0.8);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            pointer-events: all;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-        
-        .nav-arrow:hover {
-            background: rgba(139, 69, 19, 1);
-            transform: scale(1.1);
-        }
-        
-        .nav-arrow.disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-        
-        .nav-arrow.disabled:hover {
-            transform: none;
-            background: rgba(139, 69, 19, 0.8);
-        }
-        
-        /* Book spine */
-        .book-spine {
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 20px;
-            background: linear-gradient(to right, #8B4513, #654321, #8B4513);
-            transform: translateX(-50%);
-            z-index: 5;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-        }
-        
-        /* Page curl effect */
-        .book-page::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 10px;
-            background: linear-gradient(to right, rgba(0,0,0,0.1), transparent);
-            z-index: 1;
-        }
-        
-        .left-page::before {
-            right: 0;
-        }
-        
-        .right-page::before {
-            left: 0;
-            background: linear-gradient(to left, rgba(0,0,0,0.1), transparent);
-        }
-        
-        /* Content formatting for book view */
-        .book-view-content {
-            max-width: 100%;
-            margin: 0 auto;
-            line-height: 1.8;
-            font-size: 16px;
-        }
-        
-        .book-view-content h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e4e7ed;
-            padding-bottom: 10px;
-            text-align: center;
-        }
-        
-        .book-view-content h2 {
-            font-size: 20px;
-            margin: 25px 0 15px 0;
-        }
-        
-        .book-view-content p {
-            margin-bottom: 15px;
-            text-align: justify;
-        }
-        
-        /* EPUB in book view */
-        .epub-book-container {
-            width: 100%;
-            height: 100%;
-        }
-        
-        /* PDF in book view */
-        .pdf-book-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-        }
-        
-        .pdf-book-page {
-            max-width: 90%;
-            max-height: 90%;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        
-        /* TXT in book view */
-        .txt-book-content {
-            white-space: pre-wrap;
-            font-family: 'Georgia', serif;
-            line-height: 1.8;
-            text-align: justify;
-        }
-        
-        /* DOCX in book view */
-        .docx-book-content {
-            line-height: 1.8;
-            text-align: justify;
-        }
-        
-        /* Mobile adjustments for book view */
-        @media (max-width: 900px) {
-            .book-navigation-mode .book-view-container {
-                flex-direction: column;
-            }
-            
-            .book-page {
-                width: 100%;
-                height: 50%;
-                position: relative;
-            }
-            
-            .book-spine {
-                display: none;
-            }
-            
-            .nav-arrow {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
-            }
-        }
-        
-        /* Theme support for book view */
-        .theme-dark .book-navigation-mode {
-            background: #2d2d2d !important;
-        }
-        
-        .theme-dark .book-page {
-            background: #1a1a1a;
-            color: #e0e0e0;
-            border-color: #444;
-        }
-        
-        .theme-dark .page-content {
-            background: #1a1a1a;
-            color: #e0e0e0;
-        }
-        
-        .theme-tan .book-navigation-mode {
-            background: #eee8d5 !important;
-        }
-        
-        .theme-tan .book-page {
-            background: #fdf6e3;
-            color: #586e75;
-            border-color: #d5c9a7;
-        }
-        
-        .theme-tan .page-content {
-            background: #fdf6e3;
-            color: #586e75;
-        }
-        
-        .theme-blue .book-navigation-mode {
-            background: #bbdefb !important;
-        }
-        
-        .theme-blue .book-page {
-            background: #e3f2fd;
-            color: #1565c0;
-            border-color: #90caf9;
-        }
-        
-        .theme-blue .page-content {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-        
-        .theme-green .book-navigation-mode {
-            background: #c8e6c9 !important;
-        }
-        
-        .theme-green .book-page {
-            background: #e8f5e8;
-            color: #2e7d32;
-            border-color: #a5d6a7;
-        }
-        
-        .theme-green .page-content {
-            background: #e8f5e8;
-            color: #2e7d32;
-        }
-        
+/* ===== ENHANCED MOBILE RESPONSIVENESS ===== */
+@media (max-width: 900px) {
+    /* Body and container adjustments */
+    body {
+        background-color: #8B4513 !important;
+        align-items: flex-start;
+        padding: 0;
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+    }
+    
+    .book {
+        width: 100vw;
+        height: 100vh;
+        flex-direction: column;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 0;
+        transform: none;
+        max-height: none;
+        margin: 0;
+        scale: 1.2 !important;
+    }
+    
+    .pages-container {
+        flex-direction: column;
+        border-radius: 0;
+        height: 100vh;
+    }
+    
+    .page {
+        width: 100% !important;
+        border: none !important;
+        box-shadow: none !important;
+        transform: none !important;
+        height: 50vh;
+        padding: 15px;
+        overflow-y: auto;
+    }
+    
+    .left-page {
+        border-bottom: 3px solid #a0522d !important;
+        border-radius: 0 !important;
+    }
+    
+    .right-page {
+        border-top: 3px solid #a0522d !important;
+        border-radius: 0 !important;
+    }
+    
+    /* Full-screen reader mode for mobile */
+    .reader-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1000;
+        background: white;
+        border-radius: 0;
+    }
+    
+    /* Enhanced reader header for mobile */
+    .reader-header {
+        padding: 12px 15px;
+        background: #8B4513;
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 1001;
+    }
+    
+    .reader-header .book-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: white;
+        text-align: center;
+        flex-grow: 1;
+        margin: 0 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .reader-header .control-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    
+    .reader-header .el-button {
+        background: rgba(255,255,255,0.2) !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        color: white !important;
+        min-width: 40px;
+        min-height: 40px;
+    }
+    
+    /* Enhanced reader content for mobile */
+    .reader-content {
+        height: calc(100vh - 120px) !important;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Mobile-optimized EPUB reader */
+    #epub-container, #epub-navigation-container {
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    /* Mobile-optimized PDF reader */
+    .pdf-page {
+        max-width: 100% !important;
+        height: auto !important;
+        margin: 10px auto;
+    }
+    
+    /* Mobile-optimized text content */
+    .docx-content, .txt-content {
+        padding: 20px 15px;
+        font-size: 16px;
+        line-height: 1.6;
+        max-width: 100%;
+    }
+    
+    .navigation-mode .txt-content {
+        width: 95% !important;
+        height: auto !important;
+        min-height: 70vh;
+        margin: 10px auto;
+        padding: 20px;
+    }
+    
+    /* Enhanced mobile navigation controls */
+    .navigation-controls {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(139, 69, 19, 0.95);
+        padding: 12px 20px;
+        border-radius: 25px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        z-index: 1002;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    
+    .navigation-controls .el-button {
+        background: white !important;
+        color: #8B4513 !important;
+        border: none !important;
+        min-width: 80px;
+        font-weight: 600;
+    }
+    
+    .page-info {
+        color: white;
+        font-weight: 600;
+        min-width: 100px;
+        text-align: center;
+    }
+    
+    /* Enhanced library mobile view */
+    .library-header h1, .dashboard-header h1 {
+        font-size: 22px;
+        margin: 10px 0;
+    }
+    
+    .nav-tabs {
+        display: none;
+    }
+    
+    .mobile-nav {
+        display: flex;
+        padding: 12px 15px;
+        background: #8B4513;
+        color: white;
+        margin: -15px -15px 15px -15px;
+        border-radius: 0;
+    }
+    
+    .mobile-nav-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: white;
+    }
+    
+    .mobile-nav-tabs {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .mobile-nav-tab {
+        padding: 8px 12px;
+        border-radius: 15px;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .mobile-nav-tab.active {
+        background: white;
+        color: #8B4513;
+        font-weight: 600;
+    }
+    
+    /* Enhanced book list for mobile */
+    .book-list {
+        padding: 5px 0;
+    }
+    
+    .book-item {
+        padding: 15px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border: 1px solid #e8e8e8;
+    }
+    
+    .book-cover {
+        width: 50px;
+        height: 65px;
+        margin-right: 12px;
+        border-radius: 6px;
+    }
+    
+    .book-info h3 {
+        font-size: 15px;
+        margin-bottom: 4px;
+        line-height: 1.3;
+    }
+    
+    .book-info p {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+    
+    /* Enhanced buttons for mobile */
+    .book-actions, .rental-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .book-actions .el-button,
+    .rental-actions .el-button {
+        padding: 8px 12px;
+        font-size: 12px;
+        min-height: 36px;
+        flex: 1;
+        text-align: center;
+    }
+    
+    /* Enhanced status badges for mobile */
+    .availability-status {
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 8px;
+        margin: 5px 0;
+    }
+    
+    .rental-status {
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 8px;
+    }
+    
+    .countdown-timer {
+        font-size: 11px;
+        margin-top: 4px;
+    }
+    
+    /* Enhanced login form for mobile */
+    .login-container {
+        padding: 20px;
+        justify-content: flex-start;
+        padding-top: 40px;
+    }
+    
+    .login-title {
+        font-size: 24px;
+        margin-bottom: 30px;
+    }
+    
+    .el-form {
+        width: 100% !important;
+    }
+    
+    /* Hide bookmark on mobile */
+    .bookmark {
+        display: none;
+    }
+    
+    /* Enhanced dashboard sections */
+    .dashboard-section {
+        margin-bottom: 25px;
+    }
+    
+    .dashboard-subtitle {
+        font-size: 17px;
+        margin-bottom: 15px;
+        color: #8B4513;
+        font-weight: 600;
+    }
+    
+    /* Queue status improvements */
+    .queue-countdown-timer {
+        font-size: 11px;
+        margin-top: 5px;
+    }
+    
+    .queue-position-info {
+        font-size: 11px;
+        margin-top: 3px;
+    }
+    
+    /* Settings button positioning */
+    .nav-tabs .el-button {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255,255,255,0.9) !important;
+    }
+    
+    /* Empty state improvements */
+    .empty-library {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+    }
+    
+    .empty-library p {
+        font-size: 15px;
+        margin-top: 10px;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+    .book-item {
+        padding: 12px;
+    }
+    
+    .book-cover {
+        width: 45px;
+        height: 60px;
+    }
+    
+    .book-info h3 {
+        font-size: 14px;
+    }
+    
+    .mobile-nav-tab {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+    
+    .reader-header {
+        padding: 10px 12px;
+    }
+    
+    .reader-header .book-title {
+        font-size: 14px;
+    }
+    
+    .navigation-controls {
+        padding: 10px 15px;
+        gap: 10px;
+    }
+    
+    .navigation-controls .el-button {
+        min-width: 70px;
+        font-size: 12px;
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 901px) and (max-width: 1024px) {
+    .book {
+        width: 95vw;
+        height: 90vh;
+    }
+    
+    .book-cover {
+        width: 70px;
+        height: 90px;
+    }
+}
+
+/* Touch-friendly improvements for all mobile */
+@media (hover: none) and (pointer: coarse) {
+    .el-button {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .book-item {
+        cursor: default;
+    }
+    
+    /* Improve touch scrolling */
+    .reader-content {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+    
+    /* Larger tap targets */
+    .mobile-nav-tab {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+}
+.tab-badge {
+    background: #ff4757;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    margin-left: 4px;
+    font-weight: bold;
+}
+/* ===== ENHANCED MOBILE HAMBURGER MENU ===== */
+.mobile-menu-container {
+    position: relative;
+    display: none;
+}
+
+.mobile-menu-button {
+    background: rgba(255,255,255,0.9) !important;
+    border: none !important;
+    color: #8B4513 !important;
+    width: 44px !important;
+    height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+.mobile-menu-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    min-width: 200px;
+    z-index: 1000;
+    margin-top: 8px;
+    overflow: hidden;
+    border: 1px solid #e8e8e8;
+}
+
+.mobile-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+    text-decoration: none;
+}
+
+.mobile-menu-item:last-child {
+    border-bottom: none;
+}
+
+.mobile-menu-item:hover {
+    background: #f8f8f8;
+    color: #8B4513;
+}
+
+.mobile-menu-item i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.mobile-menu-divider {
+    height: 1px;
+    background: #e8e8e8;
+    margin: 5px 0;
+}
+
+.mobile-menu-header {
+    padding: 12px 16px;
+    background: #f8f8f8;
+    font-weight: 600;
+    color: #8B4513;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+/* Enhanced mobile navigation */
+@media (max-width: 900px) {
+    /* Hide desktop nav buttons */
+    .nav-tabs .el-button {
+        display: none !important;
+    }
+    
+    /* Show mobile menu */
+    .mobile-menu-container {
+        display: block;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 100;
+    }
+    
+    /* Enhanced mobile nav tabs */
+    .mobile-nav-tabs {
+        flex: 1;
+        justify-content: center;
+        gap: 5px;
+    }
+    
+    .mobile-nav-tab {
+        flex: 1;
+        text-align: center;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        padding: 8px 8px;
+    }
+    
+    /* Adjust mobile nav title */
+    .mobile-nav-title {
+        font-size: 16px;
+        margin-right: 50px; /* Space for menu button */
+    }
+    
+    /* Enhanced reader header for mobile */
+    .reader-header {
+        padding: 10px 12px;
+    }
+    
+    .reader-header .book-title {
+        font-size: 15px;
+        margin: 0 8px;
+    }
+    
+    .reader-header .control-group {
+        gap: 6px;
+    }
+    
+    .reader-header .el-button {
+        min-width: 36px;
+        min-height: 36px;
+        padding: 6px !important;
+    }
+    
+    /* Enhanced book items */
+    .book-item {
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+    }
+    
+    .book-cover {
+        width: 45px;
+        height: 60px;
+        margin-right: 10px;
+    }
+    
+    .book-info h3 {
+        font-size: 14px;
+        line-height: 1.3;
+    }
+    
+    .book-info p {
+        font-size: 12px;
+    }
+    
+    /* Enhanced buttons */
+    .book-actions .el-button,
+    .rental-actions .el-button {
+        padding: 6px 10px;
+        font-size: 11px;
+        min-height: 32px;
+    }
+    
+    /* Better navigation controls */
+    .navigation-controls {
+        padding: 10px 15px;
+        gap: 8px;
+        bottom: 15px;
+    }
+    
+    .navigation-controls .el-button {
+        min-width: 70px;
+        font-size: 11px;
+        padding: 8px 12px;
+    }
+    
+    .page-info {
+        font-size: 12px;
+        min-width: 90px;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+    .mobile-nav-tab {
+        font-size: 11px;
+        padding: 6px 4px;
+    }
+    
+    .book-item {
+        padding: 10px;
+    }
+    
+    .book-cover {
+        width: 40px;
+        height: 55px;
+    }
+    
+    .book-info h3 {
+        font-size: 13px;
+    }
+    
+    .navigation-controls {
+        padding: 8px 12px;
+        gap: 6px;
+    }
+    
+    .navigation-controls .el-button {
+        min-width: 60px;
+        font-size: 10px;
+        padding: 6px 10px;
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 901px) and (max-width: 1024px) {
+    .mobile-menu-container {
+        display: none; /* Hide on tablet */
+    }
+}
+
+/* Theme support for mobile menu */
+.theme-dark .mobile-menu-dropdown {
+    background: #2d2d2d;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.theme-dark .mobile-menu-item {
+    color: #e0e0e0;
+    border-bottom-color: #444;
+}
+
+.theme-dark .mobile-menu-item:hover {
+    background: #383838;
+    color: #fff;
+}
+
+.theme-dark .mobile-menu-header {
+    background: #383838;
+    color: #fff;
+    border-bottom-color: #444;
+}
+
+.theme-dark .mobile-menu-divider {
+    background: #444;
+}
+
+.theme-tan .mobile-menu-dropdown {
+    background: #fdf6e3;
+    border-color: #d5c9a7;
+    color: #586e75;
+}
+
+.theme-tan .mobile-menu-item {
+    color: #586e75;
+    border-bottom-color: #eee8d5;
+}
+
+.theme-tan .mobile-menu-item:hover {
+    background: #eee8d5;
+    color: #073642;
+}
+
+.theme-tan .mobile-menu-header {
+    background: #eee8d5;
+    color: #073642;
+    border-bottom-color: #d5c9a7;
+}
+/* Hide desktop buttons on mobile */
+@media (max-width: 900px) {
+    .desktop-settings-btn,
+    .desktop-logout-btn {
+        display: none !important;
+    }
+    
+    /* Ensure mobile menu is properly positioned */
+    .mobile-menu-container {
+        position: absolute;
+        top: 50%;
+        right: 15px;
+        transform: translateY(-50%);
+    }
+}
+
+/* Ensure desktop buttons show on larger screens */
+@media (min-width: 901px) {
+    .mobile-menu-container {
+        display: none !important;
+    }
+    
+    .desktop-settings-btn,
+    .desktop-logout-btn {
+        display: inline-flex !important;
+    }
+}
+/* Enhanced touch interactions */
+@media (hover: none) and (pointer: coarse) {
+    .mobile-menu-item {
+        min-height: 48px;
+        padding: 14px 16px;
+    }
+    
+    .mobile-menu-button {
+        min-width: 48px !important;
+        min-height: 48px !important;
+    }
+    
+    /* Prevent zoom on input focus for iOS */
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* Smooth animations for mobile menu */
+.mobile-menu-dropdown {
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Backdrop for mobile menu when open */
+.mobile-menu-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.1);
+    z-index: 999;
+}
+
+/* Enhanced mobile navigation controls */
+.navigation-controls {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Better text readability on mobile */
+@media (max-width: 900px) {
+    .book-info h3 {
+        font-weight: 600;
+        line-height: 1.3;
+    }
+    
+    .availability-status {
+        font-weight: 500;
+    }
+    
+    .countdown-timer {
+        font-weight: 600;
+    }
+}
 </style>
 
 <script>
@@ -2013,16 +2496,17 @@ document.addEventListener('vue-ready', function() {
         <div v-if="isAuthenticated && currentBook" class="reader-container" :class="`theme-${theme}`">
             <!-- Reader Header -->
          <!-- Reader Header -->
+<!-- Reader Header -->
 <div class="reader-header">
     <div class="control-group">
-        <el-button icon="el-icon-back" circle @click="closeBook" size="small"></el-button>
-        <el-button v-if="currentBook.type === 'epub'" icon="el-icon-arrow-left" circle @click="prevPage" size="small"></el-button>
-        <el-button v-if="currentBook.type === 'epub'" icon="el-icon-arrow-right" circle @click="nextPage" size="small"></el-button>
+        <el-button icon="el-icon-back" circle @click="closeBook" size="small" class="mobile-back-btn"></el-button>
+        <el-button v-if="currentBook.type === 'epub' && !isMobileDevice" icon="el-icon-arrow-left" circle @click="prevPage" size="small"></el-button>
+        <el-button v-if="currentBook.type === 'epub' && !isMobileDevice" icon="el-icon-arrow-right" circle @click="nextPage" size="small"></el-button>
     </div>
     <div class="book-title">{{ currentBook.title }}</div>
     <div class="control-group">
-        <!-- Navigation Toggle Button -->
-        <el-tooltip :content="navigationMode ? 'Switch to Scroll Mode' : 'Switch to Page Navigation'" placement="bottom">
+        <!-- Navigation Toggle - Hide on mobile since we auto-enable it -->
+        <el-tooltip v-if="!isMobileDevice" :content="navigationMode ? 'Switch to Scroll Mode' : 'Switch to Page Navigation'" placement="bottom">
             <el-button 
                 :icon="navigationMode ? 'el-icon-sort' : 'el-icon-document'" 
                 circle 
@@ -2037,8 +2521,9 @@ document.addEventListener('vue-ready', function() {
         <el-button icon="el-icon-switch-button" circle @click="logout" size="small"></el-button>
     </div>
 </div>
-         <!-- Reader Content -->
-<div class="reader-content" :class="{ 'navigation-mode': navigationMode, 'book-navigation-mode': navigationMode }">
+            
+          <!-- Reader Content -->
+<div class="reader-content" :class="{ 'navigation-mode': navigationMode }">
     <div v-if="!isReady" class="loading">
         <el-button type="text" :loading="true">Loading {{ currentBook.type.toUpperCase() }}...</el-button>
         <div v-if="loadError" class="error-message">
@@ -2046,52 +2531,26 @@ document.addEventListener('vue-ready', function() {
         </div>
     </div>
     
-    <!-- Book Navigation View -->
-    <div v-else-if="navigationMode" class="book-view-container" :class="pageTurningClass">
-        <!-- Book Spine -->
-        <div class="book-spine"></div>
-        
-        <!-- Left Page -->
-        <div class="book-page left-page">
-            <div class="page-content">
-                <div class="book-view-content" v-html="leftPageContent"></div>
-            </div>
-            <div class="page-number">{{ currentLeftPage }}</div>
-        </div>
-        
-        <!-- Right Page -->
-        <div class="book-page right-page">
-            <div class="page-content">
-                <div class="book-view-content" v-html="rightPageContent"></div>
-            </div>
-            <div class="page-number">{{ currentRightPage }}</div>
-        </div>
-        
-        <!-- Navigation Arrows -->
-        <div class="book-navigation-arrows">
-            <div class="nav-arrow left-arrow" 
-                 :class="{ disabled: !hasPreviousPage }" 
-                 @click="previousPage">
-                ‹
-            </div>
-            <div class="nav-arrow right-arrow" 
-                 :class="{ disabled: !hasNextPage }" 
-                 @click="nextPage">
-                ›
-            </div>
-        </div>
+    <!-- EPUB Reader -->
+    <div v-else-if="currentBook.type === 'epub'" 
+         :class="{ 'epub-navigation-container': navigationMode }"
+         :id="navigationMode ? 'epub-navigation-container' : 'epub-container'">
     </div>
     
-    <!-- Scroll View (when navigationMode is false) -->
-    <div v-else>
-        <!-- EPUB Reader -->
-        <div v-if="currentBook.type === 'epub'" 
-             id="epub-container">
-        </div>
+    <!-- PDF Reader -->
+    <div v-else-if="currentBook.type === 'pdf'" 
+         :class="{ 'pdf-navigation-container': navigationMode }"
+         :id="navigationMode ? 'pdf-navigation-container' : 'pdf-container'">
         
-        <!-- PDF Reader -->
-        <div v-else-if="currentBook.type === 'pdf'" 
-             id="pdf-container">
+        <div v-if="navigationMode" class="pdf-navigation-view">
+            <canvas v-for="page in pdfPages" 
+                    :key="page.pageNumber" 
+                    :id="`pdf-page-${page.pageNumber}`" 
+                    class="pdf-page"
+                    :style="{ display: currentPdfPage === page.pageNumber ? 'block' : 'none' }">
+            </canvas>
+        </div>
+        <div v-else>
             <canvas v-for="page in pdfPages" 
                     :key="page.pageNumber" 
                     :id="`pdf-page-${page.pageNumber}`" 
@@ -2099,16 +2558,82 @@ document.addEventListener('vue-ready', function() {
             </canvas>
         </div>
         
-        <!-- DOCX/DOC Reader -->
-        <div v-else-if="currentBook.type === 'docx' || currentBook.type === 'doc'">
-            <div class="docx-content" v-html="docxContent"></div>
+        <!-- PDF Navigation Controls -->
+        <div v-if="navigationMode && currentBook.type === 'pdf'" class="navigation-controls">
+            <el-button 
+                icon="el-icon-arrow-left" 
+                @click="prevPdfPage"
+                :disabled="currentPdfPage <= 1"
+                size="small">
+                Previous
+            </el-button>
+            <span class="page-info">
+                Page {{ currentPdfPage }} of {{ pdfPages.length }}
+            </span>
+            <el-button 
+                icon="el-icon-arrow-right" 
+                @click="nextPdfPage"
+                :disabled="currentPdfPage >= pdfPages.length"
+                size="small">
+                Next
+            </el-button>
+        </div>
+    </div>
+    
+    <!-- DOCX/DOC Reader -->
+    <div v-else-if="currentBook.type === 'docx' || currentBook.type === 'doc'" 
+         :class="{ 'content-navigation-container': navigationMode }">
+        
+        <div :class="{ 'content-navigation-view': navigationMode }" class="docx-content" v-html="docxContent"></div>
+        
+        <!-- DOCX Navigation Controls -->
+        <div v-if="navigationMode" class="navigation-controls">
+            <el-button 
+                icon="el-icon-arrow-up" 
+                @click="scrollContent(-300)"
+                size="small">
+                Scroll Up
+            </el-button>
+            <el-button 
+                icon="el-icon-arrow-down" 
+                @click="scrollContent(300)"
+                size="small">
+                Scroll Down
+            </el-button>
+        </div>
+    </div>
+<!-- TXT Reader -->
+<div v-else-if="currentBook.type === 'txt'" 
+     :class="{ 'content-navigation-container': navigationMode }">
+    
+    <!-- Navigation Mode -->
+    <div v-if="navigationMode" class="txt-page-container">
+        <div class="content-navigation-view">
+            <div class="txt-content">
+                {{ currentTxtPageContent }}
+            </div>
         </div>
         
-        <!-- TXT Reader -->
-        <div v-else-if="currentBook.type === 'txt'">
-            <div class="txt-content scroll-mode">{{ txtContent }}</div>
+        <div class="navigation-controls">
+            <el-button 
+                icon="el-icon-arrow-left" 
+                @click="prevTxtPage"
+                :disabled="currentTxtPage <= 1"
+                size="small">
+                Previous
+            </el-button>
+            <span class="page-info">
+                Page {{ currentTxtPage }} of {{ totalTxtPages }}
+            </span>
+            <el-button 
+                icon="el-icon-arrow-right" 
+                @click="nextTxtPage"
+                :disabled="currentTxtPage >= totalTxtPages"
+                size="small">
+                Next
+            </el-button>
         </div>
-
+    </div>
     
     <!-- Scroll Mode (Original) -->
     <div v-else class="txt-content scroll-mode">
@@ -2135,28 +2660,118 @@ document.addEventListener('vue-ready', function() {
                     <h1>BeteBrana</h1>
                     <p>Your Digital Library</p>
                 </div>
-                <div v-else class="dashboard-container">
-                    <!-- Mobile Navigation -->
-                    <div class="mobile-nav">
-                        <div class="mobile-nav-title">My Library</div>
-                        
-                        <div class="mobile-nav-tabs">
-                            <div class="mobile-nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">Borrowed</div>
-                            <div class="mobile-nav-tab" :class="{ active: currentTab === 'queue' }" @click="currentTab = 'queue'">Queue</div>
-                                <!-- <div class="mobile-nav-tab" :class="{ active: currentTab === 'downloaded' }" @click="currentTab = 'downloaded'">Downloaded</div> -->
-
-                        </div>
-                    </div>
-                    
-                    <div class="nav-tabs">
+              <!-- Replace the entire dashboard navigation section with this: -->
+<div v-else class="dashboard-container">
+    <!-- Enhanced Mobile Navigation -->
+    <div class="mobile-nav">
+        <div class="mobile-nav-title">
+            <span v-if="currentTab === 'rentals'">📚 My Books</span>
+            <span v-else-if="currentTab === 'queue'">⏳ My Queue</span>
+            <span v-else-if="currentTab === 'downloaded'">📥 Downloaded</span>
+            <span v-else>BeteBrana</span>
+        </div>
+        
+        <div class="mobile-nav-tabs">
+            <div class="mobile-nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">
+                <span v-if="userRentals.length > 0" class="tab-badge">{{ userRentals.length }}</span>
+                Borrowed
+            </div>
+            <div class="mobile-nav-tab" :class="{ active: currentTab === 'queue' }" @click="currentTab = 'queue'">
+                <span v-if="userQueue.length > 0" class="tab-badge">{{ userQueue.length }}</span>
+                Queue
+            </div>
+            <div class="mobile-nav-tab" :class="{ active: currentTab === 'downloaded' }" @click="currentTab = 'downloaded'">
+                <span v-if="downloadedBooks.length > 0" class="tab-badge">{{ downloadedBooks.length }}</span>
+                Downloaded
+            </div>
+        </div>
+        
+        <!-- Mobile Hamburger Menu -->
+        <div class="mobile-menu-container">
+            <el-button 
+                class="mobile-menu-button"
+                icon="el-icon-more"
+                circle 
+                @click="toggleMobileMenu"
+                size="small">
+            </el-button>
+            
+            <div v-if="showMobileMenu" class="mobile-menu-dropdown" :class="`theme-${theme}`">
+                <div class="mobile-menu-header">
+                    Settings & Actions
+                </div>
+                <div class="mobile-menu-item" @click="showSettings">
+                    <i class="el-icon-s-operation"></i>
+                    Reading Settings
+                </div>
+                <div class="mobile-menu-item" @click="showThemeSelector">
+                    <i class="el-icon-brush"></i>
+                    Change Theme
+                </div>
+                <div class="mobile-menu-divider"></div>
+                <div class="mobile-menu-item" @click="refreshLibrary">
+                    <i class="el-icon-refresh"></i>
+                    Refresh Library
+                </div>
+                <div class="mobile-menu-divider"></div>
+                <div class="mobile-menu-item" @click="logout" style="color: #f56c6c;">
+                    <i class="el-icon-switch-button"></i>
+                    Logout
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Desktop Navigation (hidden on mobile) -->
+    <div class="nav-tabs">
+        <div class="nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">Borrowed</div>
+        <div class="nav-tab" :class="{ active: currentTab === 'queue' }" @click="currentTab = 'queue'">Queue</div>
+        <div class="nav-tab" :class="{ active: currentTab === 'downloaded' }" @click="currentTab = 'downloaded'">Downloaded</div>
+        
+        <!-- Desktop buttons (hidden on mobile) -->
+        <el-button 
+            icon="el-icon-s-operation" 
+            circle 
+            @click="showSettings" 
+            size="small" 
+            style="margin-left: 150px; margin-bottom:5px; width:40px; height:40px"
+            class="desktop-settings-btn">
+        </el-button>
+        <el-button 
+            icon="el-icon-switch-button" 
+            circle 
+            @click="logout" 
+            size="small" 
+            style="margin-bottom:5px; width:40px; height:40px"
+            class="desktop-logout-btn">
+        </el-button>
+    </div>
+    
+    <!-- Rest of your dashboard content remains the same -->
+    <!-- Currently Rented Books -->
+    <div v-if="currentTab === 'rentals'" class="dashboard-section">
+        <!-- ... existing rentals content ... -->
+    </div>
+    
+    <!-- Your Queue -->
+    <div v-if="currentTab === 'queue'" class="dashboard-section">
+        <!-- ... existing queue content ... -->
+    </div>
+    
+    <!-- Downloaded Files Section -->
+    <div v-if="currentTab === 'downloaded'" class="dashboard-section">
+        <!-- ... existing downloaded content ... -->
+    </div>
+   
+                    <!-- <div class="nav-tabs">
                         <div class="nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">Borrowed</div>
                         <div class="nav-tab" :class="{ active: currentTab === 'queue' }" @click="currentTab = 'queue'">Queue</div>
-                             <!-- <div class="nav-tab" :class="{ active: currentTab === 'downloaded' }" @click="currentTab = 'downloaded'" >Downloaded</div> -->
-                        <el-button icon="el-icon-s-operation" circle @click="showSettings" size="small" style="margin-left: 290px; padding-left: 10px; margin-bottom:5px; width:40px; height:40px"></el-button>
+                             <div class="nav-tab" :class="{ active: currentTab === 'downloaded' }" @click="currentTab = 'downloaded'" >Downloaded</div>
+                        <el-button icon="el-icon-s-operation" circle @click="showSettings" size="small" style="margin-left: 150px; padding-left: 10px; margin-bottom:5px; width:40px; height:40px"></el-button>
 
                         <el-button icon="el-icon-switch-button" circle @click="logout" size="small" style=" margin-bottom:5px; width:40px; height:40px"></el-button>
 
-                    </div>
+                    </div> -->
                     
                     <!-- Currently Rented Books -->
                     <div v-if="currentTab === 'rentals'" class="dashboard-section">
@@ -2198,14 +2813,14 @@ document.addEventListener('vue-ready', function() {
         :title="offlineMode ? 'Book unavailable offline - Download first' : 'Read book'">
         Read
     </el-button>
-    <!-- <el-button 
+    <el-button 
         type="success" 
         size="mini" 
         @click.stop="downloadRentedBook(rental)" 
         :disabled="offlineMode"
         :title="offlineMode ? 'You are offline' : 'Download for offline reading'">
         Download
-    </el-button> -->
+    </el-button>
     <el-button 
         type="warning" 
         size="mini" 
@@ -2679,16 +3294,8 @@ const secureStorage = new SecureStorage();
         txtPages: [],
         currentTxtPageContent: '',
         navigationMode: false,
+        showMobileMenu: false,
         currentPdfPage: 1,
-                        // Book navigation properties
-                currentLeftPage: 1,
-                currentRightPage: 2,
-                pageTurningClass: '',
-                leftPageContent: '',
-                rightPageContent: '',
-                totalBookPages: 0,
-                hasPreviousPage: false,
-                hasNextPage: true,
             // Authentication
             isAuthenticated: false,
             token: null,
@@ -2787,40 +3394,25 @@ const secureStorage = new SecureStorage();
     },
 async mounted() {
     // Check for existing authentication
-const token = localStorage.getItem('reader-token');
+    const token = localStorage.getItem('reader-token');
     const user = localStorage.getItem('reader-user');
+        // Setup mobile gestures and menu
+    this.setupMobileGestures();
+    this.setupMobileMenuClose();
+    this.handleMobileMenu();
     
+    // Add resize listener for mobile adjustments
+    window.addEventListener('resize', this.handleMobileResize);
     if (token && user) {
-        try {
-            // Verify the token is still valid by making a test API call
-            await this.apiCall('/test');
-            
-            // If we get here, token is valid
-            this.token = token;
-            this.user = JSON.parse(user);
-            this.isAuthenticated = true;
-            
-            // Continue with initialization...
-            const savedTheme = localStorage.getItem('reader-theme');
-            if (savedTheme) {
-                this.theme = savedTheme;
-            }
-            
-            await secureStorage.init();
-            await this.loadDownloadedBooks();
-            await this.loadLibrary();
-            await this.loadUserData();
-            this.applyTheme();
-            this.startCountdownTimer();
-            this.startQueueTimer();
-            this.checkOfflineStatus();
-            
-        } catch (error) {
-            // Token is invalid, force logout
-            console.warn('Invalid token detected, forcing logout:', error);
-            this.forceLogout('Your session has expired. Please login again.');
+        this.token = token;
+        this.user = JSON.parse(user);
+        this.isAuthenticated = true;
+        
+        // Load saved theme from localStorage
+        const savedTheme = localStorage.getItem('reader-theme');
+        if (savedTheme) {
+            this.theme = savedTheme;
         }
-    
          // Load navigation mode preference
     const savedNavigationMode = localStorage.getItem('reader-navigation-mode');
     if (savedNavigationMode) {
@@ -2836,6 +3428,8 @@ const token = localStorage.getItem('reader-token');
         await this.loadLibrary();
         await this.loadUserData();
         this.applyTheme();
+         this.setupMobileGestures();
+         this.handleMobileMenu();
         
         // Start countdown timer for rentals
         this.startCountdownTimer();
@@ -2845,7 +3439,7 @@ const token = localStorage.getItem('reader-token');
         
         // Check offline status
         this.checkOfflineStatus();
-        
+        window.addEventListener('resize', this.handleMobileResize);
         // Watch for register dialog when offline
         this.$watch('showRegister', (newVal) => {
             if (newVal && !navigator.onLine) {
@@ -2854,6 +3448,7 @@ const token = localStorage.getItem('reader-token');
             }
         });
     }
+       
     
     // Set initial tab based on screen size
     if (this.isMobile) {
@@ -2867,40 +3462,73 @@ const token = localStorage.getItem('reader-token');
     window.addEventListener('online', this.checkOfflineStatus);
     window.addEventListener('offline', this.checkOfflineStatus);
 },
-// Add this method to periodically validate the token
-startTokenValidation() {
-    // Check token validity every 5 minutes
-    this.tokenValidationTimer = setInterval(async () => {
-        if (this.isAuthenticated && this.token) {
-            try {
-                // Simple API call to validate token
-                await this.apiCall('/user/rentals');
-            } catch (error) {
-                if (error.message.includes('Authentication failed')) {
-                    this.forceLogout('Session expired. Please login again.');
-                }
-            }
+    // Fix the handleMobileMenu method
+    handleMobileMenu() {
+        if (this.isMobileDevice() && this.currentTab === 'all') {
+            this.currentTab = 'rentals';
         }
-    }, 5 * 60 * 1000); // 5 minutes
+    },
+    
+    // Enhanced mobile detection
+    isMobileDevice() {
+        return window.innerWidth <= 900 || 
+               /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    },estroy() {
+    // ... existing cleanup ...
+    window.removeEventListener('resize', this.handleMobileResize);
 },
-beforeDestroy() {
-    // Clear all timers
-    if (this.countdownTimer) {
-        clearInterval(this.countdownTimer);
-    }
-    if (this.queueTimer) {
-        clearInterval(this.queueTimer);
-    }
-    if (this.tokenValidationTimer) {
-        clearInterval(this.tokenValidationTimer);
-    }
-    window.removeEventListener('resize', this.handleResize);
-},
-
 methods: {
-     // NEW: Enhanced toggleNavigationMode to handle A4 formatting and pagination
-// Enhanced toggleNavigationMode to properly handle both modes
-// Enhanced toggleNavigationMode to handle initialization properly
+      toggleMobileMenu() {
+        this.showMobileMenu = !this.showMobileMenu;
+    },
+     
+    showThemeSelector() {
+        this.showMobileMenu = false;
+        this.settingsVisible = true;
+        // Focus on theme selection
+        this.$nextTick(() => {
+            const themeGroup = document.querySelector('.theme-selector');
+            if (themeGroup) {
+                themeGroup.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    },
+    refreshLibrary() {
+        this.showMobileMenu = false;
+        this.loadLibrary();
+        this.loadUserData();
+        this.$message.success('Library refreshed successfully');
+    },
+    
+    // Close mobile menu when clicking outside
+    setupMobileMenuClose() {
+        document.addEventListener('click', (e) => {
+            const menuContainer = document.querySelector('.mobile-menu-container');
+            const menuButton = document.querySelector('.mobile-menu-button');
+            
+            if (this.showMobileMenu && 
+                menuContainer && 
+                !menuContainer.contains(e.target) && 
+                !menuButton.contains(e.target)) {
+                this.showMobileMenu = false;
+            }
+        });
+    },
+    
+     handleMobileResize() {
+        this.handleMobileMenu();
+        // Re-apply any mobile-specific adjustments
+        if (this.isMobileDevice()) {
+            // Force reflow for mobile layout
+            this.$nextTick(() => {
+                document.body.style.overflow = 'hidden';
+            });
+        }
+    },
+    isMobileDevice() {
+        return window.innerWidth <= 900 || 
+               /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    },
 toggleNavigationMode() {
     this.navigationMode = !this.navigationMode;
     
@@ -2912,80 +3540,19 @@ toggleNavigationMode() {
         
         // Reset to first page when switching to navigation mode
         if (this.navigationMode) {
-            this.initializeBookNavigation();
-            
             if (this.currentBook.type === 'pdf') {
                 this.currentPdfPage = 1;
-                this.resetBookNavigation();
             } else if (this.currentBook.type === 'txt') {
                 this.currentTxtPage = 1;
                 this.currentTxtPageContent = this.txtPages[0] || '';
-                this.resetBookNavigation();
             }
         }
-localStorage.setItem('reader-navigation-mode', this.navigationMode.toString());
-
+        
         // Force re-render of content
         this.applyZoom();
     });
 },
-  // Load pages for book navigation
-            async loadBookPages() {
-                switch(this.currentBook.type) {
-                    case 'pdf':
-                        await this.loadPdfBookPages();
-                        break;
-                    case 'epub':
-                        await this.loadEpubBookPages();
-                        break;
-                    case 'docx':
-                    case 'doc':
-                        await this.loadDocxBookPages();
-                        break;
-                    case 'txt':
-                        await this.loadTxtBookPages();
-                        break;
-                }
-                
-                // Update navigation state
-                this.updateNavigationState();
-            },
-            
-            // Load PDF pages for book view
-            async loadPdfBookPages() {
-                if (!this.pdfDoc) return;
-                
-                // For PDF, we'll render the current pages to canvases
-                // and display them in the book view
-                this.totalBookPages = this.pdfDoc.numPages;
-                
-                // Load left page
-                if (this.currentLeftPage <= this.totalBookPages) {
-                    await this.renderPdfPageToBook(this.currentLeftPage, 'left');
-                } else {
-                    this.leftPageContent = '<div style="text-align: center; padding: 50px;">Blank Page</div>';
-                }
-                
-                // Load right page
-                if (this.currentRightPage <= this.totalBookPages) {
-                    await this.renderPdfPageToBook(this.currentRightPage, 'right');
-                } else {
-                    this.rightPageContent = '<div style="text-align: center; padding: 50px;">Blank Page</div>';
-                }
-            },
-            // Initialize book navigation
-            initializeBookNavigation() {
-                this.currentLeftPage = 1;
-                this.currentRightPage = 2;
-                this.pageTurningClass = '';
-                
-                // Load initial pages based on document type
-                this.loadBookPages();
-            },
-                        resetBookNavigation() {
-                this.pageTurningClass = '';
-                // No need to reset other properties as they'll be reinitialized
-            },
+    
     // NEW: Paginate TXT content for A4 paper navigation
 // UPDATE this method for better pagination
 paginateTxtContent() {
@@ -3161,85 +3728,42 @@ paginateTxtContent() {
     checkOfflineStatus() {
         this.offlineMode = !navigator.onLine;
     },
-    // API Helper with automatic logout on token failure
-async apiCall(endpoint, options = {}) {
-    const url = `${API_BASE}${endpoint}`;
-    const config = {
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        },
-        ...options
-    };
+    
+                
+                // API Helper
+                async apiCall(endpoint, options = {}) {
+                    const url = `${API_BASE}${endpoint}`;
+                    const config = {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...options.headers
+                        },
+                        ...options
+                    };
 
-    if (this.token) {
-        config.headers.Authorization = `Bearer ${this.token}`;
-    }
+                    if (this.token) {
+                        config.headers.Authorization = `Bearer ${this.token}`;
+                    }
 
-    if (options.body) {
-        config.body = JSON.stringify(options.body);
-    }
+                    if (options.body) {
+                        config.body = JSON.stringify(options.body);
+                    }
 
-    try {
-        const response = await fetch(url, config);
-        const data = await response.json();
-        
-        if (!response.ok) {
-            // Check if it's an authentication error
-            if (response.status === 401 || response.status === 403) {
-                this.forceLogout('Session expired. Please login again.');
-                throw new Error('Authentication failed');
-            }
-            throw new Error(data.error || 'Request failed');
-        }
-        
-        return data;
-    } catch (error) {
-        console.error('API call error:', error);
-        
-        // If it's a network error but we're online, check if it's auth-related
-        if (error.message.includes('Failed to fetch') && navigator.onLine) {
-            this.forceLogout('Authentication error. Please login again.');
-        }
-        
-        throw error;
-    }
-},     
-// Add this to your methods
-forceLogout(message = 'Session expired') {
-    console.log('Force logout triggered:', message);
-    
-    // Clear all stored data
-    localStorage.removeItem('reader-token');
-    localStorage.removeItem('reader-user');
-    localStorage.removeItem('reader-theme');
-    localStorage.removeItem('reader-navigation-mode');
-    
-    // Clear timers
-    if (this.countdownTimer) {
-        clearInterval(this.countdownTimer);
-    }
-    if (this.queueTimer) {
-        clearInterval(this.queueTimer);
-    }
-    
-    // Reset all state
-    this.token = null;
-    this.user = null;
-    this.isAuthenticated = false;
-    this.currentBook = null;
-    this.bookList = [];
-    this.userRentals = [];
-    this.userQueue = [];
-    
-    // Show message to user
-    if (message) {
-        this.$message.warning(message);
-    }
-    
-    // Force Vue to update the view
-    this.$forceUpdate();
-},
+                    try {
+                        const response = await fetch(url, config);
+                        const data = await response.json();
+                        
+                        if (!response.ok) {
+                            throw new Error(data.error || 'Request failed');
+                        }
+                        
+                        return data;
+                    } catch (error) {
+                        console.error('API call error:', error);
+                        throw error;
+                    }
+                },
+                
                 // Authentication
                 async handleLogin() {
                     this.$refs.loginForm.validate(async (valid) => {
@@ -3342,18 +3866,14 @@ forceLogout(message = 'Session expired') {
                 },
                 
                 // Data Loading
-async loadLibrary() {
-    try {
-        this.bookList = await this.apiCall('/books');
-    } catch (error) {
-        // Don't show error message if it's due to authentication
-        // The forceLogout method will handle the user notification
-        if (!error.message.includes('Authentication failed')) {
-            console.error('Error loading library:', error);
-            this.$message.error('Failed to load library: ' + error.message);
-        }
-    }
-},
+                async loadLibrary() {
+                    try {
+                        this.bookList = await this.apiCall('/books');
+                    } catch (error) {
+                        console.error('Error loading library:', error);
+                        this.$message.error('Failed to load library: ' + error.message);
+                    }
+                },
                 
                 async loadUserData() {
                     try {
@@ -3366,144 +3886,7 @@ async loadLibrary() {
                         console.error('Error loading user data:', error);
                     }
                 },
-                async renderPdfPageToBook(pageNumber, side) {
-                try {
-                    const pdfPage = await this.pdfDoc.getPage(pageNumber);
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    
-                    // Calculate dimensions to fit book page
-                    const bookPageWidth = document.querySelector('.book-page').offsetWidth - 60; // Account for padding
-                    const bookPageHeight = document.querySelector('.book-page').offsetHeight - 60;
-                    
-                    const viewport = pdfPage.getViewport({ scale: 1 });
-                    const scale = Math.min(bookPageWidth / viewport.width, bookPageHeight / viewport.height);
-                    const scaledViewport = pdfPage.getViewport({ scale: scale * 0.9 }); // Slight margin
-                    
-                    canvas.width = scaledViewport.width;
-                    canvas.height = scaledViewport.height;
-                    
-                    await pdfPage.render({
-                        canvasContext: context,
-                        viewport: scaledViewport
-                    }).promise;
-                    
-                    // Convert canvas to data URL and set as content
-                    const dataUrl = canvas.toDataURL();
-                    if (side === 'left') {
-                        this.leftPageContent = `<img src="${dataUrl}" style="max-width: 100%; height: auto;" alt="Page ${pageNumber}">`;
-                    } else {
-                        this.rightPageContent = `<img src="${dataUrl}" style="max-width: 100%; height: auto;" alt="Page ${pageNumber}">`;
-                    }
-                } catch (error) {
-                    console.error('Error rendering PDF page to book:', error);
-                    if (side === 'left') {
-                        this.leftPageContent = `<div style="text-align: center; padding: 50px;">Error loading page ${pageNumber}</div>`;
-                    } else {
-                        this.rightPageContent = `<div style="text-align: center; padding: 50px;">Error loading page ${pageNumber}</div>`;
-                    }
-                }
-            },
-            
-            // Load EPUB pages for book view
-            async loadEpubBookPages() {
-                if (!this.book || !this.rendition) return;
                 
-                // For EPUB, we'll use the existing navigation but display two pages
-                // This is a simplified implementation
-                this.leftPageContent = '<div style="text-align: center; padding: 50px;">EPUB content loading...</div>';
-                this.rightPageContent = '<div style="text-align: center; padding: 50px;">EPUB content loading...</div>';
-                
-                // In a real implementation, you would extract and format EPUB content
-                // for the book view. This is a placeholder.
-                this.totalBookPages = 100; // Placeholder
-            },
-            
-            // Load DOCX pages for book view
-            async loadDocxBookPages() {
-                // For DOCX, we'll split the content into pages
-                if (!this.docxContent) return;
-                
-                // Simple pagination - split by approximate page length
-                const wordsPerPage = 500; // Adjust based on content density
-                const words = this.docxContent.split(' ');
-                this.totalBookPages = Math.ceil(words.length / wordsPerPage);
-                
-                // Get content for current pages
-                const leftStart = (this.currentLeftPage - 1) * wordsPerPage;
-                const leftEnd = Math.min(leftStart + wordsPerPage, words.length);
-                this.leftPageContent = words.slice(leftStart, leftEnd).join(' ');
-                
-                const rightStart = (this.currentRightPage - 1) * wordsPerPage;
-                const rightEnd = Math.min(rightStart + wordsPerPage, words.length);
-                this.rightPageContent = words.slice(rightStart, rightEnd).join(' ');
-            },
-            
-            // Load TXT pages for book view
-            async loadTxtBookPages() {
-                // For TXT, we'll split the content into pages
-                if (!this.txtContent) return;
-                
-                // Simple pagination - split by approximate page length
-                const linesPerPage = 40; // Adjust based on content density
-                const lines = this.txtContent.split('\n');
-                this.totalBookPages = Math.ceil(lines.length / linesPerPage);
-                
-                // Get content for current pages
-                const leftStart = (this.currentLeftPage - 1) * linesPerPage;
-                const leftEnd = Math.min(leftStart + linesPerPage, lines.length);
-                this.leftPageContent = lines.slice(leftStart, leftEnd).join('\n');
-                
-                const rightStart = (this.currentRightPage - 1) * linesPerPage;
-                const rightEnd = Math.min(rightStart + linesPerPage, lines.length);
-                this.rightPageContent = lines.slice(rightStart, rightEnd).join('\n');
-            },
-            
-            // Navigate to next page
-            nextPage() {
-                if (!this.hasNextPage) return;
-                
-                // Add page turning animation
-                this.pageTurningClass = 'page-turning-left';
-                
-                // Update page numbers after animation
-                setTimeout(() => {
-                    this.currentLeftPage += 2;
-                    this.currentRightPage += 2;
-                    
-                    // Load new pages
-                    this.loadBookPages();
-                    
-                    // Reset animation class
-                    this.pageTurningClass = '';
-                }, 600); // Match animation duration
-            },
-            
-            // Navigate to previous page
-            previousPage() {
-                if (!this.hasPreviousPage) return;
-                
-                // Add page turning animation
-                this.pageTurningClass = 'page-turning-right';
-                
-                // Update page numbers after animation
-                setTimeout(() => {
-                    this.currentLeftPage -= 2;
-                    this.currentRightPage -= 2;
-                    
-                    // Load new pages
-                    this.loadBookPages();
-                    
-                    // Reset animation class
-                    this.pageTurningClass = '';
-                }, 600); // Match animation duration
-            },
-            
-            // Update navigation state (enable/disable arrows)
-            updateNavigationState() {
-                this.hasPreviousPage = this.currentLeftPage > 1;
-                this.hasNextPage = this.currentRightPage < this.totalBookPages;
-            },
                 // Book Operations
 async openBook(bookInfo) {
     try {
@@ -3518,12 +3901,24 @@ async openBook(bookInfo) {
         
         this.isReady = false;
         this.loadError = null;
-        
-        // Set navigation mode to false by default (scroll mode)
-        this.navigationMode = false;
+      if (this.isMobileDevice()) {
+                this.navigationMode = true;
+                localStorage.setItem('reader-navigation-mode', 'true');
+            } else {
+                this.navigationMode = false;
+            }
         
         await this.loadDocument(this.currentBook);
         this.isReady = true;
+           // Scroll to top on mobile
+            if (this.isMobileDevice()) {
+                setTimeout(() => {
+                    const readerContent = document.querySelector('.reader-content');
+                    if (readerContent) {
+                        readerContent.scrollTop = 0;
+                    }
+                }, 100);
+            }
         
     } catch (error) {
         console.error('Error opening book:', error);
@@ -3634,6 +4029,9 @@ beforeDestroy() {
         clearInterval(this.queueTimer);
     }
     window.removeEventListener('resize', this.handleResize);
+        window.removeEventListener('resize', this.handleMobileResize);
+    // Remove mobile menu close listener
+    document.removeEventListener('click', this.setupMobileMenuClose);
 },
 // Format time remaining for queue reservation
 // Format time remaining for queue reservation - make it more user-friendly
@@ -4526,7 +4924,73 @@ async loadTXT(url) {
                     this.pdfPages = [];
                     this.docxContent = '';
                     this.txtContent = '';
+                      this.navigationMode = false;
+        this.currentPdfPage = 1;
+         this.showMobileMenu = false;
+ // On mobile, ensure we're back to the main view
+        if (this.isMobileDevice()) {
+            // Force reflow to ensure proper rendering
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 50);
+        }
+    
+
                 },
+                 // Enhanced mobile navigation
+    setupMobileGestures() {
+        if (!this.isMobileDevice()) return;
+        
+        let startX = 0;
+        let startY = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        document.addEventListener('touchend', (e) => {
+            if (!this.currentBook || !this.navigationMode) return;
+            
+            const endX = e.changedTouches[0].clientX;
+            const endY = e.changedTouches[0].clientY;
+            
+            const diffX = startX - endX;
+            const diffY = startY - endY;
+            
+            // Only handle horizontal swipes (minimize vertical scroll interference)
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    // Swipe left - next page
+                    this.nextPageOrContent();
+                } else {
+                    // Swipe right - previous page
+                    this.prevPageOrContent();
+                }
+            }
+        }, { passive: true });
+    },
+    
+        nextPageOrContent() {
+        if (this.currentBook.type === 'pdf') {
+            this.nextPdfPage();
+        } else if (this.currentBook.type === 'txt') {
+            this.nextTxtPage();
+        } else if (this.currentBook.type === 'epub') {
+            this.nextPage();
+        }
+    },
+    
+    prevPageOrContent() {
+        if (this.currentBook.type === 'pdf') {
+            this.prevPdfPage();
+        } else if (this.currentBook.type === 'txt') {
+            this.prevTxtPage();
+        } else if (this.currentBook.type === 'epub') {
+            this.prevPage();
+        }
+    },
+    
                 
                 prevPage() {
                     if (this.rendition) {
@@ -4534,11 +4998,11 @@ async loadTXT(url) {
                     }
                 },
                 
-                // nextPage() {
-                //     if (this.rendition) {
-                //         this.rendition.next();
-                //     }
-                // },
+                nextPage() {
+                    if (this.rendition) {
+                        this.rendition.next();
+                    }
+                },
                 
                 goBack() {
                     if (this.currentBook.type === 'pdf') {
@@ -4568,12 +5032,12 @@ prevPage() {
     }
 },
 
-// nextPage() {
-//     if (this.rendition) {
-//         this.rendition.next();
-//         this.updateProgress();
-//     }
-// },
+nextPage() {
+    if (this.rendition) {
+        this.rendition.next();
+        this.updateProgress();
+    }
+},
               applyZoom() {
     const effectiveSize = this.fontSize * this.zoomLevel;
     
