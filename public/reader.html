@@ -87,6 +87,7 @@
             border-top-left-radius: 5px;
             border-bottom-left-radius: 5px;
             transform-origin: right;
+            
             z-index: 2;
         }
         
@@ -1637,16 +1638,7 @@ body.offline .reader-footer .el-button {
 </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-<div id="initial-loading" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column; gap: 20px;">
-    <div style="font-size: 24px; color: #8B4513;">📚 BeteBrana</div>
-    <div style="display: flex; gap: 10px;">
-        <div style="width: 12px; height: 12px; background: #8B4513; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both;"></div>
-        <div style="width: 12px; height: 12px; background: #8B4513; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; animation-delay: 0.16s;"></div>
-        <div style="width: 12px; height: 12px; background: #8B4513; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; animation-delay: 0.32s;"></div>
-    </div>
-    <div style="color: #666; font-size: 14px;">Loading your digital library...</div>
-</div>
+
 
 <style>
 @keyframes bounce {
@@ -1815,7 +1807,7 @@ body.offline .v-modal {
             left: 50%;
             top: 0;
             bottom: 0;
-            width: 20px;
+            width: 10px;
             background: linear-gradient(to right, #8B4513, #654321, #8B4513);
             transform: translateX(-50%);
             z-index: 5;
@@ -1902,13 +1894,19 @@ body.offline .v-modal {
             line-height: 1.8;
             text-align: justify;
         }
-        
+        @media (min-width: 901px) {
+    .mobile-hamburger {
+        display: none !important;
+    }
+}
         /* Mobile adjustments for book view */
         @media (max-width: 900px) {
             .book-navigation-mode .book-view-container {
                 flex-direction: column;
             }
-            
+            .left-page{
+                height: 100vh;
+            }
             .book-page {
                 width: 100%;
                 height: 50%;
@@ -1986,8 +1984,514 @@ body.offline .v-modal {
             background: #e8f5e8;
             color: #2e7d32;
         }
+         /* NEW: Mobile Hamburger Navigation */
+        .mobile-hamburger {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 21px;
+            cursor: pointer;
+        }
+        
+        .mobile-hamburger span {
+            display: block;
+            height: 3px;
+            width: 100%;
+            background-color: #8B4513;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-hamburger.active span:nth-child(1) {
+            transform: translateY(9px) rotate(45deg);
+        }
+        
+        .mobile-hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .mobile-hamburger.active span:nth-child(3) {
+            transform: translateY(-9px) rotate(-45deg);
+        }
+        .mobile-sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100%;
+    background: white;
+    z-index: 99;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    overflow-y: auto;
+    visibility: hidden;
+    opacity: 0;
+}
+
+.mobile-sidebar.active {
+    left: 0;
+    visibility: visible;
+    opacity: 1;
+}
+
+.mobile-sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 98;
+    display: none;
+}
+
+.mobile-sidebar-overlay.active {
+    display: block;
+}
+        .mobile-sidebar-header {
+            padding: 20px;
+            background: #8B4513;
+            color: white;
+            text-align: center;
+        }
+        
+        .mobile-sidebar-nav {
+            padding: 20px 0;
+        }
+        
+        .mobile-sidebar-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        
+        .mobile-sidebar-item:hover {
+            background: #f9f9f9;
+        }
+        
+        .mobile-sidebar-item.active {
+            background: #f0f7ff;
+            color: #409eff;
+            border-left: 3px solid #409eff;
+        }
+        
+        .mobile-sidebar-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Mobile-specific layout adjustments */
+       .mobile-hamburger {
+        display: flex !important;
+    }
+    
+    .mobile-nav {
+        display: none !important;
+    }
+    
+    .nav-tabs {
+        display: none !important;
+    }
+    
+    /* Hide right page by default on mobile */
+    .right-page {
+        display: none !important;
+    }
+    
+    .left-page {
+        width: 100% !important;
+        height: 100% !important;
+        border: none !important;
+        box-shadow: none !important;
+        transform: none !important;
+        display: flex !important;
+    }
+    
+    /* Show right page when in library mode */
+    .library-mode .right-page {
+        display: flex !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    .library-mode .left-page {
+        display: none !important;
+    }
+    
+    /* Remove the old dashboard-mode styles */
+    .dashboard-mode .left-page,
+    .dashboard-mode .right-page {
+        display: none !important;
+    }
+    /* Ensure themes work in mobile full-height mode */
+@media (max-width: 900px) {
+        .login-container {
+        height: 100% !important;
+        justify-content: center !important;
+    }
+    #app{
+        transform: scale(1.2)!important;
+    }
+    .reader-container{
+        z-index: 1000 !important;
+    }
+    .dashboard-subtitle{
+        text-align: center;
+    }
+    .welcome-page {
+        height: 100% !important;
+        justify-content: center !important;
+    }
+    .theme-light .left-page,
+    .theme-light .right-page {
+        background-color: #ffffff !important;
+    }
+    
+    .theme-dark .left-page,
+    .theme-dark .right-page {
+        background-color: #2c2c2c !important;
+    }
+    
+    .theme-tan .left-page,
+    .theme-tan .right-page {
+        background-color: #fdf6e3 !important;
+    }
+    
+    .theme-blue .left-page,
+    .theme-blue .right-page {
+        background-color: #e3f2fd !important;
+    }
+    
+    .theme-green .left-page,
+    .theme-green .right-page {
+        background-color: #e8f5e8 !important;
+    }
+}
+ .mobile-sidebar {
+            background: white;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-dark .mobile-sidebar {
+            background: #2c2c2c !important;
+            color: #e0e0e0 !important;
+        }
+        
+        .theme-tan .mobile-sidebar {
+            background: #fdf6e3 !important;
+            color: #586e75 !important;
+        }
+        
+        .theme-blue .mobile-sidebar {
+            background: #e3f2fd !important;
+            color: #1565c0 !important;
+        }
+        
+        .theme-green .mobile-sidebar {
+            background: #e8f5e8 !important;
+            color: #2e7d32 !important;
+        }
+        
+        .mobile-sidebar-header {
+            background: #8B4513 !important;
+            color: white !important;
+        }
+        
+        .mobile-sidebar-item {
+            border-bottom-color: #f0f0f0;
+        }
+        
+        .theme-dark .mobile-sidebar-item {
+            border-bottom-color: #444;
+        }
+        
+        .mobile-sidebar-item:hover {
+            background: #f9f9f9;
+        }
+        
+        .theme-dark .mobile-sidebar-item:hover {
+            background: #383838;
+        }
+        
+        .theme-tan .mobile-sidebar-item:hover {
+            background: #eee8d5;
+        }
+        
+        .theme-blue .mobile-sidebar-item:hover {
+            background: #bbdefb;
+        }
+        
+        .theme-green .mobile-sidebar-item:hover {
+            background: #c8e6c9;
+        }
+        
+        .mobile-sidebar-item.active {
+            background: #f0f7ff;
+            color: #409eff;
+            border-left: 3px solid #409eff;
+        }
+        
+        .theme-dark .mobile-sidebar-item.active {
+            background: #2a3b4d;
+        }
+        
+        /* Fix mobile layout for dashboard */
+        @media (max-width: 900px) {
+            .dashboard-mode .left-page {
+                display: flex !important;
+                width: 100% !important;
+                height: 100% !important;
+            }
+            
+            .dashboard-mode .right-page {
+                display: none !important;
+            }
+            
+            .library-mode .left-page {
+                display: none !important;
+            }
+            
+            .library-mode .right-page {
+                display: flex !important;
+                width: 100% !important;
+                height: 100% !important;
+            }
+            
+            /* Ensure dashboard content is visible */
+            .dashboard-container {
+                height: 100%;
+                overflow-y: auto;
+            }
+        }
+        
+        /* Fix for mobile hamburger menu visibility */
+        @media (max-width: 900px) {
+            .mobile-hamburger {
+                display: flex !important;
+            }
+        }
+        
+        /* Fix for dashboard tab switching */
+        .dashboard-container .book-list {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
         
 </style>
+<style>
+/* ===== FIX FOR DESKTOP MODE ===== */
+
+/* Reset mobile overrides for desktop */
+@media (min-width: 901px) {
+    .book {
+        flex-direction: row !important;
+        height: 85vh !important;
+        max-height: 800px !important;
+        padding: 10px !important;
+        transform: perspective(2000px) !important;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.5) !important;
+        border-radius: 10px !important;
+    }
+    
+    .pages-container {
+        flex-direction: row !important;
+        border-radius: 5px !important;
+    }
+    
+    .page {
+        width: 50% !important;
+        height: 100% !important;
+        border: none !important;
+        box-shadow: none !important;
+        transform: none !important;
+        display: flex !important;
+    }
+    
+    .left-page {
+        border-right: 2px solid #ddd !important;
+        box-shadow: inset 5px 0 10px rgba(0, 0, 0, 0.1) !important;
+        border-top-left-radius: 5px !important;
+        border-bottom-left-radius: 5px !important;
+    }
+    
+    .right-page {
+        border-left: 2px solid #ddd !important;
+        box-shadow: inset -5px 0 10px rgba(0, 0, 0, 0.1) !important;
+        border-top-right-radius: 5px !important;
+        border-bottom-right-radius: 5px !important;
+        display: flex !important;
+    }
+    
+    .mobile-hamburger {
+        display: none !important;
+    }
+    
+    .mobile-nav {
+        display: none !important;
+    }
+    
+    .nav-tabs {
+        display: flex !important;
+    }
+    
+    /* Remove mobile mode classes interference */
+    .dashboard-mode .left-page,
+    .dashboard-mode .right-page,
+    .library-mode .left-page,
+    .library-mode .right-page {
+        display: flex !important;
+        width: 50% !important;
+        height: 100% !important;
+    }
+    
+    /* Ensure proper display of both pages on desktop */
+    .left-page,
+    .right-page {
+        display: flex !important;
+        width: 50% !important;
+    }
+    
+    /* Fix reader container on desktop */
+    .reader-container {
+        border-radius: 5px !important;
+    }
+}
+
+/* Mobile styles should only apply below 900px */
+@media (max-width: 900px) {
+    body {
+        background-color: #fff;
+        align-items: flex-start;
+        padding: 10px;
+    }
+    
+    .book {
+        width: 100%;
+        height: 100%;
+        flex-direction: column;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 0;
+        transform: none;
+        max-height: none;
+    }
+    
+    .pages-container {
+        flex-direction: column;
+        border-radius: 0;
+    }
+    
+    .page {
+        width: 100%;
+        border: none !important;
+        box-shadow: none !important;
+        transform: none !important;
+        height: 50%;
+    }
+    
+    .left-page {
+        border-bottom: 2px solid #ddd;
+    }
+    
+    .reader-container {
+        border-radius: 0;
+    }
+    
+    .library-header h1, .dashboard-header h1 {
+        font-size: 20px;
+    }
+    
+    .nav-tabs {
+        display: none;
+    }
+    
+    .mobile-nav {
+        display: flex;
+    }
+    
+    .book-item {
+        padding: 8px;
+    }
+    
+    .book-cover {
+        width: 50px;
+        height: 70px;
+        margin-right: 10px;
+    }
+    
+    .book-info h3 {
+        font-size: 13px;
+    }
+    
+    .book-info p {
+        font-size: 11px;
+    }
+    
+    /* Mobile-specific layout for dashboard */
+    .dashboard-container .nav-tabs {
+        display: none;
+    }
+    
+    .dashboard-section {
+        margin-bottom: 15px;
+    }
+    
+    .rental-actions {
+        flex-direction: column;
+        gap: 3px;
+    }
+    
+    .rental-actions .el-button {
+        padding: 5px 8px;
+        font-size: 12px;
+    }
+    
+    /* Mobile layout modes */
+    .dashboard-mode .left-page {
+        display: flex !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    .dashboard-mode .right-page {
+        display: none !important;
+    }
+    
+    .library-mode .left-page {
+        display: none !important;
+    }
+    
+    .library-mode .right-page {
+        display: flex !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    .mobile-hamburger {
+        display: flex !important;
+    }
+}
+</style>
+    <!-- Loading Screen -->
+<div id="initial-loading" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column; gap: 20px;">
+    <div style="font-size: 24px; color: #8B4513;">📚 BeteBrana</div>
+    <div style="display: flex; gap: 10px;">
+        <div style="width: 12px; height: 12px; background: #8B4513; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both;"></div>
+        <div style="width: 12px; height: 12px; background: #8B4513; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; animation-delay: 0.16s;"></div>
+        <div style="width: 12px; height: 12px; background: #8B4513; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; animation-delay: 0.32s;"></div>
+    </div>
+    <div style="color: #666; font-size: 14px;">Loading your digital library...</div>
+</div>
 
 <script>
 // Hide loading screen when app is ready
@@ -2008,7 +2512,48 @@ document.addEventListener('vue-ready', function() {
     }
 });
 </script>
+
     <div id="app" class="book" :class="`theme-${theme}`">
+            <!-- Mobile Hamburger Menu -->
+    <div class="mobile-hamburger" :class="{ active: mobileSidebarOpen }" @click="toggleMobileSidebar">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <!-- Mobile Sidebar -->
+    <div class="mobile-sidebar" :class="{ active: mobileSidebarOpen }">
+        <div class="mobile-sidebar-header">
+            <h2>BeteBrana</h2>
+            <p>Your Digital Library</p>
+        </div>
+        <div class="mobile-sidebar-nav">
+            <div class="mobile-sidebar-item" 
+                 :class="{ active: currentView === 'library' }" 
+                 @click="switchToLibrary">
+                <i>📚</i> Library
+            </div>
+            <div class="mobile-sidebar-item" 
+                 :class="{ active: currentView === 'dashboard' }" 
+                 @click="switchToDashboard">
+                <i>📊</i> Dashboard
+            </div>
+            <div class="mobile-sidebar-item" 
+                 @click="showSettings">
+                <i>⚙️</i> Settings
+            </div>
+            <div class="mobile-sidebar-item" 
+                 @click="logout">
+                <i>🚪</i> Logout
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="mobile-sidebar-overlay" 
+         :class="{ active: mobileSidebarOpen }" 
+         @click="toggleMobileSidebar">
+    </div>
         <!-- Reader View (takes over the whole book) -->
         <div v-if="isAuthenticated && currentBook" class="reader-container" :class="`theme-${theme}`">
             <!-- Reader Header -->
@@ -2074,11 +2619,11 @@ document.addEventListener('vue-ready', function() {
                  @click="previousPage">
                 ‹
             </div>
-            <div class="nav-arrow right-arrow" 
-                 :class="{ disabled: !hasNextPage }" 
-                 @click="nextPage">
-                ›
-            </div>
+    <div class="nav-arrow right-arrow" 
+         :class="{ disabled: !hasNextPage }" 
+         @click="nextPage">
+        ›
+    </div>
         </div>
     </div>
     
@@ -2679,6 +3224,7 @@ const secureStorage = new SecureStorage();
         txtPages: [],
         currentTxtPageContent: '',
         navigationMode: false,
+        mobileSidebarOpen: false,
         currentPdfPage: 1,
                         // Book navigation properties
                 currentLeftPage: 1,
@@ -2781,7 +3327,7 @@ const secureStorage = new SecureStorage();
         // Check if we're on mobile
         isMobile() {
             return window.innerWidth <= 900;
-        },
+        }
         
         
     },
@@ -2789,6 +3335,12 @@ async mounted() {
     // Check for existing authentication
 const token = localStorage.getItem('reader-token');
     const user = localStorage.getItem('reader-user');
+    if (this.isMobile) {
+        this.currentView = 'dashboard'; 
+        this.initializeMobileLayout();
+         window.addEventListener('resize', this.handleResize);
+        document.querySelector('.book').classList.add('dashboard-mode');
+    }
     
     if (token && user) {
         try {
@@ -2805,7 +3357,8 @@ const token = localStorage.getItem('reader-token');
             if (savedTheme) {
                 this.theme = savedTheme;
             }
-            
+                            // On mobile, start with library view
+           
             await secureStorage.init();
             await this.loadDownloadedBooks();
             await this.loadLibrary();
@@ -2898,9 +3451,40 @@ beforeDestroy() {
 },
 
 methods: {
-     // NEW: Enhanced toggleNavigationMode to handle A4 formatting and pagination
-// Enhanced toggleNavigationMode to properly handle both modes
-// Enhanced toggleNavigationMode to handle initialization properly
+  // Add mobile sidebar methods
+toggleMobileSidebar() {
+    console.log('toggleMobileSidebar called - current state:', this.mobileSidebarOpen);
+    this.mobileSidebarOpen = !this.mobileSidebarOpen;
+    console.log('toggleMobileSidebar - new state:', this.mobileSidebarOpen);
+    
+    // Force Vue update
+    this.$forceUpdate();
+},
+      switchToLibrary() {
+        this.currentView = 'library';
+        this.mobileSidebarOpen = false;
+        
+        if (this.isMobile) {
+            // Remove all mode classes first
+            document.querySelector('.book').classList.remove('dashboard-mode', 'library-mode');
+            // Add library mode
+            document.querySelector('.book').classList.add('library-mode');
+        }
+    },
+
+    switchToDashboard() {
+        this.currentView = 'dashboard';
+        this.mobileSidebarOpen = false;
+        
+        if (this.isMobile) {
+            // Remove all mode classes first
+            document.querySelector('.book').classList.remove('dashboard-mode', 'library-mode');
+            // Add dashboard mode
+            document.querySelector('.book').classList.add('dashboard-mode');
+        }
+    },
+
+
 toggleNavigationMode() {
     this.navigationMode = !this.navigationMode;
     
@@ -3137,11 +3721,24 @@ paginateTxtContent() {
     },
     // Handle window resize
     handleResize() {
+        const wasMobile = this.isMobile;
+        this.isMobile = window.innerWidth <= 900;
+        
+        // If switching from mobile to desktop, remove mobile layout classes
+        if (wasMobile && !this.isMobile) {
+            document.querySelector('.book').classList.remove('dashboard-mode', 'library-mode');
+        }
+        
+        // If switching to/from mobile, reinitialize layout
+        if (wasMobile !== this.isMobile) {
+            this.initializeMobileLayout();
+        }
+        
         if (this.isMobile && this.currentTab === 'all') {
             this.currentTab = 'rentals';
         }
     },
-    
+
     startQueueTimer() {
         // Update queue timers every second
         this.queueTimer = setInterval(() => {
@@ -3331,15 +3928,29 @@ forceLogout(message = 'Session expired') {
                 },
                 
                 // Navigation
-                showLibrary() {
-                    this.currentView = 'library';
-                    this.currentBook = null;
-                },
+                  showLibrary() {
+        this.currentView = 'library';
+        this.currentBook = null;
+        
+        if (this.isMobile) {
+            this.switchToLibrary();
+        } else {
+            // On desktop, just update the view without changing layout
+            document.querySelector('.book').classList.remove('dashboard-mode', 'library-mode');
+        }
+    },
                 
                 showDashboard() {
-                    this.currentView = 'dashboard';
-                    this.currentTab = 'rentals';
-                },
+        this.currentView = 'dashboard';
+        this.currentTab = 'rentals';
+        
+        if (this.isMobile) {
+            this.switchToDashboard();
+        } else {
+            // On desktop, just update the view without changing layout
+            document.querySelector('.book').classList.remove('dashboard-mode', 'library-mode');
+        }
+    },
                 
                 // Data Loading
 async loadLibrary() {
@@ -3460,25 +4071,31 @@ async loadLibrary() {
             },
             
             // Navigate to next page
-            nextPage() {
-                if (!this.hasNextPage) return;
-                
-                // Add page turning animation
-                this.pageTurningClass = 'page-turning-left';
-                
-                // Update page numbers after animation
-                setTimeout(() => {
-                    this.currentLeftPage += 2;
-                    this.currentRightPage += 2;
-                    
-                    // Load new pages
-                    this.loadBookPages();
-                    
-                    // Reset animation class
-                    this.pageTurningClass = '';
-                }, 600); // Match animation duration
-            },
+        nextPage() {
+    if (this.navigationMode) {
+        // Use book navigation for page flipping
+        if (!this.hasNextPage) return;
+        
+        // Add page turning animation
+        this.pageTurningClass = 'page-turning-left';
+        
+        // Update page numbers after animation
+        setTimeout(() => {
+            this.currentLeftPage += 2;
+            this.currentRightPage += 2;
             
+            // Load new pages
+            this.loadBookPages();
+            
+            // Reset animation class
+            this.pageTurningClass = '';
+        }, 600); // Match animation duration
+    } else if (this.rendition) {
+        // Use EPUB navigation for scroll mode
+        this.rendition.next();
+        this.updateProgress();
+    }
+},
             // Navigate to previous page
             previousPage() {
                 if (!this.hasPreviousPage) return;
@@ -3802,7 +4419,7 @@ computed: {
         }
         return this.bookList;
     },
-    
+
     // Check if we're on mobile
     isMobile() {
         return window.innerWidth <= 900;
@@ -4597,13 +5214,26 @@ prevPage() {
         }
     }
 },
-                applyTheme() {
-                    // Save theme to localStorage
-                    localStorage.setItem('reader-theme', this.theme);
-                    
-                    // Update PDF container background
-                    this.updatePDFBackground();
-                },
+            applyTheme() {
+                localStorage.setItem('reader-theme', this.theme);
+                this.updatePDFBackground();
+                
+                // Force re-render of mobile sidebar
+                this.$forceUpdate();
+            },
+              initializeMobileLayout() {
+        if (this.isMobile) {
+            // Start with dashboard view on mobile
+            this.currentView = 'dashboard';
+            this.currentTab = 'rentals';
+            this.switchToDashboard();
+        } else {
+            // On desktop, ensure both pages are visible
+            this.currentView = 'library'; // or whatever default you want
+            document.querySelector('.book').classList.remove('dashboard-mode', 'library-mode');
+        }
+    },
+        
                 
                 updatePDFBackground() {
                     if (this.currentBook && this.currentBook.type === 'pdf') {
