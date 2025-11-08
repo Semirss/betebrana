@@ -1901,6 +1901,25 @@ body.offline .v-modal {
 }
         /* Mobile adjustments for book view */
         @media (max-width: 900px) {
+             .library-mode .left-page {
+        display: none !important;
+    }
+    
+    .library-mode .right-page {
+        display: flex !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    .dashboard-mode .left-page {
+        display: flex !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    .dashboard-mode .right-page {
+        display: none !important;
+    }
             .book-navigation-mode .book-view-container {
                 flex-direction: column;
             }
@@ -3226,6 +3245,8 @@ const secureStorage = new SecureStorage();
         navigationMode: false,
         mobileSidebarOpen: false,
         currentPdfPage: 1,
+        isMobile: window.innerWidth <= 900,
+
                         // Book navigation properties
                 currentLeftPage: 1,
                 currentRightPage: 2,
@@ -3324,11 +3345,15 @@ const secureStorage = new SecureStorage();
             return this.bookList;
         },
         
-        // Check if we're on mobile
-        isMobile() {
-            return window.innerWidth <= 900;
-        }
-        
+    //   isMobile: {
+    //     get() {
+    //         return window.innerWidth <= 900;
+    //     },
+    //     set() {
+    //         // This prevents the warning, but we don't actually set this value
+    //         // The real value comes from the getter
+    //     }
+    // }
         
     },
 async mounted() {
@@ -3460,29 +3485,44 @@ toggleMobileSidebar() {
     // Force Vue update
     this.$forceUpdate();
 },
-      switchToLibrary() {
-        this.currentView = 'library';
-        this.mobileSidebarOpen = false;
+switchToLibrary() {
+    this.currentView = 'library';
+    this.mobileSidebarOpen = false;
+    
+    if (this.isMobile) {
+        // Remove all mode classes first
+        const bookElement = document.querySelector('.book');
+        bookElement.classList.remove('dashboard-mode', 'library-mode');
         
-        if (this.isMobile) {
-            // Remove all mode classes first
-            document.querySelector('.book').classList.remove('dashboard-mode', 'library-mode');
-            // Add library mode
-            document.querySelector('.book').classList.add('library-mode');
-        }
-    },
-
-    switchToDashboard() {
-        this.currentView = 'dashboard';
-        this.mobileSidebarOpen = false;
+        // Add library mode
+        bookElement.classList.add('library-mode');
         
-        if (this.isMobile) {
-            // Remove all mode classes first
-            document.querySelector('.book').classList.remove('dashboard-mode', 'library-mode');
-            // Add dashboard mode
-            document.querySelector('.book').classList.add('dashboard-mode');
-        }
-    },
+        // Force Vue to update the current view
+        this.$nextTick(() => {
+            // Ensure we're showing the library content
+            this.currentView = 'library';
+        });
+    }
+},
+switchToDashboard() {
+    this.currentView = 'dashboard';
+    this.mobileSidebarOpen = false;
+    
+    if (this.isMobile) {
+        // Remove all mode classes first
+        const bookElement = document.querySelector('.book');
+        bookElement.classList.remove('dashboard-mode', 'library-mode');
+        
+        // Add dashboard mode
+        bookElement.classList.add('dashboard-mode');
+        
+        // Force Vue to update the current view
+        this.$nextTick(() => {
+            // Ensure we're showing the dashboard content
+            this.currentView = 'dashboard';
+        });
+    }
+},
 
 
 toggleNavigationMode() {
@@ -3722,7 +3762,7 @@ paginateTxtContent() {
     // Handle window resize
     handleResize() {
         const wasMobile = this.isMobile;
-        this.isMobile = window.innerWidth <= 900;
+    this.isMobile = window.innerWidth <= 900;
         
         // If switching from mobile to desktop, remove mobile layout classes
         if (wasMobile && !this.isMobile) {
@@ -4421,10 +4461,7 @@ computed: {
     },
 
     // Check if we're on mobile
-    isMobile() {
-        return window.innerWidth <= 900;
-    },
-    
+
     // Books that are unavailable but can be queued
     queuableBooks() {
         return this.bookList.filter(book => 
