@@ -159,6 +159,7 @@
             justify-content: center;
             align-items: center;
             height: 100%;
+            margin-top: 90px;
         }
         
         .login-title {
@@ -1511,29 +1512,43 @@ body.offline .reader-footer .el-button {
     background: rgba(200, 230, 201, 0.9);
     color: #2e7d32;
 }
-/* DELETE THIS DUPLICATE SECTION - it's already defined above */
-.navigation-mode .txt-content {
-    max-width: 210mm; /* A4 width */
-    min-height: 297mm; /* A4 height */
-    margin: 0 auto;
-    padding: 25mm; /* Standard A4 margins */
-    background: white;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    line-height: 1.6;
-    white-space: pre-wrap;
-    font-family: inherit;
-    box-sizing: border-box;
-    overflow: hidden;
-}
 
-/* DELETE THIS DUPLICATE TOO */
-.txt-page-navigation {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
-}
+ .register-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-top: 80px;
+            height: 100%;
+        }
+        
+        .register-title {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        
+        .register-error {
+            color: #f56c6c;
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fef0f0;
+            border-radius: 4px;
+            width: 100%;
+        }
+        
+        .toggle-form {
+            text-align: center;
+            margin-top: 20px;
+            color: #409eff;
+            cursor: pointer;
+        }
+        
+        .toggle-form:hover {
+            text-decoration: underline;
+        }
 
 .txt-page-info {
     font-size: 14px;
@@ -1635,6 +1650,18 @@ body.offline .reader-footer .el-button {
 .txt-content::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
 }
+.book-view-content{
+        scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+.page-content::-webkit-scrollbar {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+.book-view-content::-webkit-scrollbar {
+        scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
 </style>
 </head>
 <body>
@@ -1709,26 +1736,7 @@ body.offline .v-modal {
             z-index: 1;
         }
         
-        /* Page turning animations */
-        .page-turning-left .left-page {
-            transform: rotateY(-180deg);
-            z-index: 1;
-        }
-        
-        .page-turning-left .right-page {
-            transform: rotateY(0deg);
-            z-index: 2;
-        }
-        
-        .page-turning-right .left-page {
-            transform: rotateY(0deg);
-            z-index: 2;
-        }
-        
-        .page-turning-right .right-page {
-            transform: rotateY(180deg);
-            z-index: 1;
-        }
+   
         
         /* Page content */
         .page-content {
@@ -1904,7 +1912,6 @@ body.offline .v-modal {
              .library-mode .left-page {
         display: none !important;
     }
-    
     .library-mode .right-page {
         display: flex !important;
         width: 100% !important;
@@ -2155,6 +2162,8 @@ body.offline .v-modal {
 @media (max-width: 900px) {
         .login-container {
         height: 100% !important;
+        margin-top: 120px !important;
+   
         justify-content: center !important;
     }
     #app{
@@ -2500,6 +2509,7 @@ body.offline .v-modal {
         display: flex !important;
     }
 }
+
 </style>
     <!-- Loading Screen -->
 <div id="initial-loading" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column; gap: 20px;">
@@ -2859,26 +2869,53 @@ document.addEventListener('vue-ready', function() {
             <!-- Right Page: Login or Library -->
             <div class="right-page page" :class="`theme-${theme}`">
                 <div class="bookmark"></div>
-                <!-- Login View -->
-                <div v-if="!isAuthenticated" class="login-container">
-                    <h2 class="login-title">Library Login</h2>
-                    <div v-if="loginError" class="login-error">{{ loginError }}</div>
-                    <el-form :model="loginForm" :rules="loginRules" ref="loginForm" style="width: 80%;">
-                        <el-form-item prop="email">
-                            <el-input v-model="loginForm.email" placeholder="Email" prefix-icon="el-icon-user"></el-input>
-                        </el-form-item>
-                        <el-form-item prop="password">
-                            <el-input v-model="loginForm.password" type="password" placeholder="Password" prefix-icon="el-icon-lock" show-password></el-input>
-                        </el-form-item>
-                        <el-form-item>
-                            <el-button type="primary" style="width: 100%" :loading="loginLoading" @click="handleLogin">Login</el-button>
-                        </el-form-item>
-                        <el-form-item>
-                            <el-button style="width: 100%" @click="showRegister = true">Register</el-button>
-                        </el-form-item>
-                    </el-form>
-                </div>
-                
+   
+    <!-- Show Login/Register when NOT authenticated -->
+    <div v-if="!isAuthenticated">
+        <!-- Login View -->
+        <div v-if="!showRegisterForm" class="login-container">
+            <h2 class="login-title">Library Login</h2>
+            <div v-if="loginError" class="login-error">{{ loginError }}</div>
+            <el-form :model="loginForm" :rules="loginRules" ref="loginForm" style="width: 80%;">
+                <el-form-item prop="email">
+                    <el-input v-model="loginForm.email" placeholder="Email" prefix-icon="el-icon-user"></el-input>
+                </el-form-item>
+                <el-form-item prop="password">
+                    <el-input v-model="loginForm.password" type="password" placeholder="Password" prefix-icon="el-icon-lock" show-password></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" style="width: 100%" :loading="loginLoading" @click="handleLogin">Login</el-button>
+                </el-form-item>
+                <el-form-item>
+                    <div class="toggle-form" @click="showRegisterForm = true">Don't have an account? Register here</div>
+                </el-form-item>
+            </el-form>
+        </div>
+        
+        <!-- Register View -->
+        <div v-if="showRegisterForm" class="register-container">
+            <h2 class="register-title">Create Account</h2>
+            <div v-if="registerError" class="register-error">{{ registerError }}</div>
+            <el-form :model="registerForm" :rules="registerRules" ref="registerForm" style="width: 80%;">
+                <el-form-item prop="name">
+                    <el-input v-model="registerForm.name" placeholder="Full Name" prefix-icon="el-icon-user"></el-input>
+                </el-form-item>
+                <el-form-item prop="email">
+                    <el-input v-model="registerForm.email" placeholder="Email" prefix-icon="el-icon-message"></el-input>
+                </el-form-item>
+                <el-form-item prop="password">
+                    <el-input v-model="registerForm.password" type="password" placeholder="Password" prefix-icon="el-icon-lock" show-password></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" style="width: 100%" :loading="registerLoading" @click="handleRegister">Register</el-button>
+                </el-form-item>
+                <el-form-item>
+                    <div class="toggle-form" @click="showRegisterForm = false">Already have an account? Login here</div>
+                </el-form-item>
+            </el-form>
+        </div>
+    </div>
+        
                 <!-- Library View -->
                 <div v-else class="library-container">
                     <div class="library-header">
@@ -2980,24 +3017,7 @@ document.addEventListener('vue-ready', function() {
             </div>
         </div>
 
-        <!-- Register Dialog -->
-        <el-dialog id="offlinetoremove" title="Register" :visible.sync="showRegister" width="400px" :class="`theme-${theme}`">
-            <el-form :model="registerForm" :rules="registerRules" ref="registerForm">
-                <el-form-item label="Name" prop="name">
-                    <el-input v-model="registerForm.name"></el-input>
-                </el-form-item>
-                <el-form-item label="Email" prop="email">
-                    <el-input v-model="registerForm.email"></el-input>
-                </el-form-item>
-                <el-form-item label="Password" prop="password">
-                    <el-input v-model="registerForm.password" type="password" show-password></el-input>
-                </el-form-item>
-            </el-form>
-            <div slot="footer">
-                <el-button @click="showRegister = false">Cancel</el-button>
-                <el-button type="primary" :loading="registerLoading" @click="handleRegister">Register</el-button>
-            </div>
-        </el-dialog>
+      
 
         <!-- Search Dialog -->
         <el-dialog title="Search" :visible.sync="searchVisible" width="500px" :class="`theme-${theme}`">
@@ -3244,6 +3264,8 @@ const secureStorage = new SecureStorage();
         currentTxtPageContent: '',
         navigationMode: false,
         mobileSidebarOpen: false,
+        showRegisterForm: false,
+        registerError: '',
         currentPdfPage: 1,
         isMobile: window.innerWidth <= 900,
 
@@ -3920,11 +3942,12 @@ forceLogout(message = 'Session expired') {
                     });
                 },
                 
-                async handleRegister() {
+               async handleRegister() {
                     this.$refs.registerForm.validate(async (valid) => {
                         if (!valid) return;
                         
                         this.registerLoading = true;
+                        this.registerError = '';
                         
                         try {
                             const result = await this.apiCall('/auth/register', {
@@ -3932,15 +3955,18 @@ forceLogout(message = 'Session expired') {
                                 body: this.registerForm
                             });
                             
-                            this.showRegister = false;
+                            // Clear form and show success message
                             this.registerForm.name = '';
                             this.registerForm.email = '';
                             this.registerForm.password = '';
                             
+                            // Switch back to login form
+                            this.showRegisterForm = false;
+                            
                             this.$message.success('Registration successful! Please login.');
                             
                         } catch (error) {
-                            this.$message.error('Registration failed: ' + error.message);
+                            this.registerError = error.message;
                         } finally {
                             this.registerLoading = false;
                         }
