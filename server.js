@@ -10,6 +10,13 @@ const pdfParse = require('pdf-parse');
 const multer = require('multer');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const cors =require('cors');
+app.use(cors({
+  origin: ['http://localhost:56358', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true
+}));
 
 // Middleware
 app.use(express.json());
@@ -17,6 +24,9 @@ app.use(express.static('public'));
 app.use('/documents', express.static('documents'));
 app.use('/covers', express.static('covers'));
 
+
+
+// ===== END CORS MIDDLEWARE =====
 // File upload configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

@@ -22,13 +22,13 @@
             align-items: center;
             background-color: #dcdcdc;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"><rect width="10" height="10" fill="%23dcdcdc"/><path d="M-1,1l2,-2m0,4l2,-2m0,4l2,-2" stroke="%23c0c0c0" stroke-width="1"/></svg>');
-            transform: scale(0.8);
+            transform: scale(0.9);
             transform-origin: center;
         }
         
         /* Book Container */
         .book {
-            width: 90vw;
+            width: 85vw;
             max-width: 1200px;
             height: 85vh;
             max-height: 800px;
@@ -1662,6 +1662,7 @@ body.offline .reader-footer .el-button {
         scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
 }
+
 </style>
 </head>
 <body>
@@ -2567,6 +2568,7 @@ document.addEventListener('vue-ready', function() {
                  @click="switchToDashboard">
                 <i>📊</i> Dashboard
             </div>
+            
             <div class="mobile-sidebar-item" 
                  @click="showSettings">
                 <i>⚙️</i> Settings
@@ -2717,7 +2719,7 @@ document.addEventListener('vue-ready', function() {
                         <div class="mobile-nav-tabs">
                             <div class="mobile-nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">Borrowed</div>
                             <div class="mobile-nav-tab" :class="{ active: currentTab === 'queue' }" @click="currentTab = 'queue'">Queue</div>
-                                <!-- <div class="mobile-nav-tab" :class="{ active: currentTab === 'downloaded' }" @click="currentTab = 'downloaded'">Downloaded</div> -->
+                                <div class="mobile-nav-tab" :class="{ active: currentTab === 'downloaded' }" @click="currentTab = 'downloaded'">Downloaded</div>
 
                         </div>
                     </div>
@@ -2725,8 +2727,8 @@ document.addEventListener('vue-ready', function() {
                     <div class="nav-tabs">
                         <div class="nav-tab" :class="{ active: currentTab === 'rentals' }" @click="currentTab = 'rentals'">Borrowed</div>
                         <div class="nav-tab" :class="{ active: currentTab === 'queue' }" @click="currentTab = 'queue'">Queue</div>
-                             <!-- <div class="nav-tab" :class="{ active: currentTab === 'downloaded' }" @click="currentTab = 'downloaded'" >Downloaded</div> -->
-                        <el-button icon="el-icon-s-operation" circle @click="showSettings" size="small" style="margin-left: 290px; padding-left: 10px; margin-bottom:5px; width:40px; height:40px"></el-button>
+                             <div class="nav-tab" :class="{ active: currentTab === 'downloaded' }" @click="currentTab = 'downloaded'" >Downloaded</div>
+                        <el-button icon="el-icon-s-operation" circle @click="showSettings" size="small" style="margin-left: 150px; padding-left: 10px; margin-bottom:5px; width:40px; height:40px"></el-button>
 
                         <el-button icon="el-icon-switch-button" circle @click="logout" size="small" style=" margin-bottom:5px; width:40px; height:40px"></el-button>
 
@@ -2743,15 +2745,15 @@ document.addEventListener('vue-ready', function() {
                                class="book-item" 
                                 :class="{ 'offline-disabled': offlineMode }"
                                 @click="!offlineMode && openRentedBook(rental)">
-                                <div class="book-cover">
-                                    <img v-if="rental.cover_image" :src="`http://localhost:3000${rental.cover_image}`" :alt="rental.title">
-                                    <div v-else class="placeholder">
-                                        <span v-if="getBookFileType(rental.book_id) === 'pdf'">📄</span>
-                                        <span v-else-if="getBookFileType(rental.book_id) === 'docx' || getBookFileType(rental.book_id) === 'doc'">📝</span>
-                                        <span v-else-if="getBookFileType(rental.book_id) === 'txt'">📃</span>
-                                        <span v-else>📁</span>
-                                    </div>
-                                </div>
+                               <div class="book-cover">
+    <img v-if="getBookCover(rental.book_id)" :src="`http://localhost:3000${getBookCover(rental.book_id)}`" :alt="rental.title">
+    <div v-else class="placeholder">
+        <span v-if="getBookFileType(rental.book_id) === 'pdf'">📄</span>
+        <span v-else-if="getBookFileType(rental.book_id) === 'docx' || getBookFileType(rental.book_id) === 'doc'">📝</span>
+        <span v-else-if="getBookFileType(rental.book_id) === 'txt'">📃</span>
+        <span v-else>📁</span>
+    </div>
+</div>
                                 <div class="book-info" id="offlinebook">
                                     <h3>{{ rental.title }}</h3>
                                     <p>{{ rental.author || 'Unknown Author' }}</p>
@@ -2772,14 +2774,14 @@ document.addEventListener('vue-ready', function() {
         :title="offlineMode ? 'Book unavailable offline - Download first' : 'Read book'">
         Read
     </el-button>
-    <!-- <el-button 
+    <el-button 
         type="success" 
         size="mini" 
         @click.stop="downloadRentedBook(rental)" 
         :disabled="offlineMode"
         :title="offlineMode ? 'You are offline' : 'Download for offline reading'">
         Download
-    </el-button> -->
+    </el-button>
     <el-button 
         type="warning" 
         size="mini" 
@@ -4155,7 +4157,7 @@ async loadLibrary() {
             
             // Reset animation class
             this.pageTurningClass = '';
-        }, 600); // Match animation duration
+        }, 200); // Match animation duration
     } else if (this.rendition) {
         // Use EPUB navigation for scroll mode
         this.rendition.next();
@@ -4179,7 +4181,7 @@ async loadLibrary() {
                     
                     // Reset animation class
                     this.pageTurningClass = '';
-                }, 600); // Match animation duration
+                }, 200); // Match animation duration
             },
             
             // Update navigation state (enable/disable arrows)
@@ -5031,7 +5033,11 @@ getDownloadTimeRemaining(book) {
         return `${hours}h`;
     }
 },
-
+// Add this method to get book cover from bookList
+getBookCover(bookId) {
+    const book = this.bookList.find(b => b.id === bookId);
+    return book ? book.cover_image : null;
+},
 getDownloadCountdownClass(book) {
     const expiryDate = new Date(book.expiry);
     const now = new Date();
